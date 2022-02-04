@@ -1,4 +1,4 @@
-package comskylerdache.spacepong;
+package com.skylerdache.spacepong;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class SpacePongApplication {
 
     public static void main(String[] args) {
+        System.out.println("hello");
         SpringApplication.run(SpacePongApplication.class, args);
     }
 

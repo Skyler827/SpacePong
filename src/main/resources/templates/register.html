@@ -5,12 +5,15 @@
     <title>Register</title>
 </head>
 <body>
-<p>Register</p>
-<form action="/register" method="post">
-    <p><label for="username">Username:</label><input id="username" name="username" type="text"></p>
-    <p><label for="password">Password:</label><input id="password" name="password" type="password"></p>
-    <p><label for="color">Paddle Color:</label><input id="color" type="color" name="color"></p>
-    <p><input type="submit"></p>
+<p>Sign up</p>
+<form th:action="@{/register}" th:object="${playerdto}" method="post">
+    <p><label for="username">Username: </label>
+        <input id="username" name="username" type="text" th:field="*{username}"></p>
+    <p><label for="password">Password: </label>
+        <input id="password" name="password" type="password" th:field="*{password}"></p>
+    <p><label for="color">Paddle Color: </label>
+        <input id="color" type="color" name="paddleColor" th:field="*{colorHex}"></p>
+    <p><input type="submit" value="Submit Registration"></p>
 </form>
 </body>
 </html>

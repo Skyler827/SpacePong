@@ -9,6 +9,7 @@ import javax.servlet.http.HttpSession;
 @Controller
 @RequestMapping(path= "/")
 public class HomeController {
+    public HomeController() {}
     @GetMapping
     public String getHome() {
         return "home";

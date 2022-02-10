@@ -1,5 +1,6 @@
 package com.skylerdache.spacepong.controllers;
 
+import com.skylerdache.spacepong.dto.PlayerDto;
 import com.skylerdache.spacepong.entities.Player;
 import com.skylerdache.spacepong.services.PlayerService;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -7,10 +8,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/login")
@@ -23,19 +21,21 @@ public class LoginController {
     }
     @GetMapping
     public String getLogin(Model model) {
+        model.addAttribute("playerdto", new PlayerDto());
         return "login";
     }
     @PostMapping
-    public String postLogin(@RequestParam String username, @RequestParam String password, Model model) {
-        Player player = playerService.getPlayerByName(username);
+    public String postLogin(@ModelAttribute("playerdto") PlayerDto playerDto, Model model) {
+        Player player = playerService.getPlayerByName(playerDto.getUsername());
         if (player == null) {
             model.addAttribute("error", "invalid login");
             return "login";
         }
 
-        UsernamePasswordAuthenticationToken authReq = new UsernamePasswordAuthenticationToken(username, password);
+        UsernamePasswordAuthenticationToken authReq = new UsernamePasswordAuthenticationToken(
+                playerDto.getUsername(), playerDto.getPassword());
         Authentication auth = authManager.authenticate(authReq);
 
-        return "login";
+        return "redirect:/";
     }
 }

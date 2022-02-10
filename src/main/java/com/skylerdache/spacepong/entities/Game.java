@@ -16,10 +16,14 @@ public class Game {
     @GeneratedValue
     private long id;
 
-    private Date start;
-    private Date end;
+    private Date startTime;
+    private Date endTime;
     @ManyToOne
     private Player player1;
     @ManyToOne
     private Player player2;
+
+    private int p1Score;
+    private int p2Score;
+    private int winningScore;
 }

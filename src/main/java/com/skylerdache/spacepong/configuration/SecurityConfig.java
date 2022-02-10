@@ -18,31 +18,31 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure (HttpSecurity http) throws Exception {
         http
             .authorizeRequests()
-                .antMatchers("/", "/login", "/register")
+                .antMatchers("/login", "/register")
                 .permitAll()
+                .anyRequest().authenticated()
                 .and()
             .formLogin()
                 .loginPage("/login")
                 .failureUrl("/login?error=true")
-                .permitAll()
                 .successForwardUrl("/")
                 .and()
             .logout()
-                .permitAll()
-                .and()
-                .authorizeRequests().anyRequest().authenticated();
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/")
+                .permitAll();
     }
-    protected void configure(AuthenticationManagerBuilder auth, PasswordEncoder encoder) throws Exception{
-        auth.
-                inMemoryAuthentication()
-                .withUser("user")
-                .password(encoder.encode("password"))
-                .roles("USER")
-                .and()
-                .withUser("admin")
-                .password(encoder.encode("password"))
-                .roles("ADMIN");
-    }
+//    protected void configure(AuthenticationManagerBuilder auth, PasswordEncoder encoder) throws Exception{
+//        auth.
+//                inMemoryAuthentication()
+//                .withUser("user")
+//                .password(encoder.encode("password"))
+//                .roles("USER")
+//                .and()
+//                .withUser("admin")
+//                .password(encoder.encode("password"))
+//                .roles("ADMIN");
+//    }
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

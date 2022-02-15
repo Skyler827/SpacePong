@@ -22,10 +22,12 @@ public class LoginController {
     @GetMapping
     public String getLogin(Model model) {
         model.addAttribute("playerdto", new PlayerDto());
+        System.out.println("running getLogin()");
         return "login";
     }
     @PostMapping
     public String postLogin(@ModelAttribute("playerdto") PlayerDto playerDto, Model model) {
+        System.out.println("running postLogin()");
         Player player = playerService.getPlayerByName(playerDto.getUsername());
         if (player == null) {
             model.addAttribute("error", "invalid login");

@@ -3,20 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <title>Login</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" href="../static/css/style.css">
 </head>
 <body>
 <p>Login</p>
-<!--<form name='f' th:action="@{/login}" th:object="${playerdto}" method='post'>-->
-<form name='f' action="/login" method='post'>
-    <table style="border: 0;">
+<form name='f' th:action="@{/login}" method='post'>
+    <div th:if="${param.error}" class="alert alert-error">Invalid username and/or password.</div>
+    <table style="border: none;">
         <tr>
             <td><label for="username">User:</label></td>
-<!--            <td><input id="username" type='text' name='username' th:field="*{username}"></td>-->
             <td><input id="username" type='text' name='username'></td>
         </tr>
         <tr>
             <td><label for="password">Password:</label></td>
-<!--            <td><input id="password" type='password' name='password' th:field="*{password}"></td>-->
             <td><input id="password" type='password' name='password'></td>
         </tr>
         <tr>

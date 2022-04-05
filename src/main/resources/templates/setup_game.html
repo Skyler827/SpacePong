@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>New Game</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" href="../static/css/style.css">
+    <script th:src="@{/js/setup_game.js}" src="../static/js/setup_game.js"></script>
+</head>
+<body>
+    <h1>Start New Game</h1>
+    <p>Enter Settings for new game:</p>
+    <form th:action="@{/setup_game}" th:object="${gameSetupDto}" method="post">
+        <label for="hlength">Horizontal length:</label> <input id="hlength" type="text">
+        <div>
+            <label for="opponent-name">Opponent:</label>
+        </div>
+        <div>
+            <select id="opponent-name" th:field="*{opponentId}" th:size="${playersSize}">
+                <option th:each="player : ${players}" th:text="${player.username}" th:value="${player.id}"></option>
+            </select>
+        </div>
+        <div>
+            <input id="submit" type="submit" value="Start New Game" disabled>
+        </div>
+    </form>
+</body>
+</html>

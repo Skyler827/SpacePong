@@ -3,9 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <title>Game</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" href="../static/css/style.css">
+    <script th:src="@{/js/three.js}" src="../static/js/three.js"></script>
+    <script th:src="@{/js/stomp.min.js}" src="../static/js/stomp.min.js"></script>
+    <script th:src="@{/js/game.js}" src="../static/js/game.js"></script>
 </head>
 <body>
-<p>Its a game</p>
-<p><a href="/">Home</a></p>
+<div id="game-page-container">
+    <div id="game-header">
+        <p><a href="#" onclick="getPaddleCoords()">Get Paddle coords</a></p>
+        <p><a href="/">Home</a></p>
+        <div id="scoreboard">
+            <a onclick="setCameraP1()" href="#">Set camera to Player 1</a>
+            <div id="score">
+                <span id="p1-score">2</span>-<span id="p2-score">7</span>
+            </div>
+            <a onclick="setCameraP2()" href="#">Set camera to Player 2</a>
+        </div>
+    </div>
+    <div id="game-container">
+        <p id="loading-message">Unable to load THREEjs javascript</p>
+    </div>
+</div>
 </body>
 </html>

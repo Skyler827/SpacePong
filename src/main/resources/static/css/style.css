@@ -1,0 +1,40 @@
+.alert,
+.alert-error {
+    border: 2px solid red;
+}
+body {
+    background-color:lightblue;
+    margin: 0;
+    height: 100vh;
+}
+#game-page-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding-left: 30px;
+    padding-right: 30px;
+}
+#game-header {
+    flex-grow: 0;
+}
+#game-container {
+    flex-grow: 1;
+}
+#scoreboard {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+}
+#scoreboard a {
+    flex-grow: 0;
+}
+#score {
+    background-color: darkslategray;
+    color: white;
+    font-size: 32pt;
+    padding: 10px 20px;
+}
+.hidden {
+    display:none;
+}

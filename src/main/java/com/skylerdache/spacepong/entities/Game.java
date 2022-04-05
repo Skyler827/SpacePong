@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.time.Instant;
 
 @Entity
 @Getter
@@ -16,14 +16,15 @@ public class Game {
     @GeneratedValue
     private long id;
 
-    private Date startTime;
-    private Date endTime;
+    private Instant startTime = Instant.now();
+    private Instant endTime;
     @ManyToOne
     private Player player1;
     @ManyToOne
     private Player player2;
 
-    private int p1Score;
-    private int p2Score;
-    private int winningScore;
+    @ManyToOne
+    private Player winner;
+    private int p1Score = 0;
+    private int p2Score = 0;
 }

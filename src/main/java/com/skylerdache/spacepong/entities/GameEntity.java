@@ -1,5 +1,6 @@
 package com.skylerdache.spacepong.entities;
 
+import com.skylerdache.spacepong.game_elements.GameOptions;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,12 +12,16 @@ import java.time.Instant;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Game {
+public class GameEntity {
     @Id
     @GeneratedValue
     private long id;
 
-    private Instant startTime = Instant.now();
+    @Embedded
+    private GameOptions options = new GameOptions();
+
+    private final Instant initializeTime = Instant.now();
+    private Instant startTime;
     private Instant endTime;
     @ManyToOne
     private Player player1;

@@ -1,79 +1,83 @@
 package com.skylerdache.spacepong.services;
 
 import com.skylerdache.spacepong.dto.GameStateDto;
-import com.skylerdache.spacepong.entities.Game;
+import com.skylerdache.spacepong.dto.PlayerControlMessage;
+import com.skylerdache.spacepong.entities.GameEntity;
+import com.skylerdache.spacepong.entities.HumanPlayer;
 import com.skylerdache.spacepong.entities.Player;
+import com.skylerdache.spacepong.enums.PlayerPosition;
 import com.skylerdache.spacepong.exceptions.NoSuchGameException;
+import com.skylerdache.spacepong.game_elements.GameOptions;
+import com.skylerdache.spacepong.game_elements.GameState;
 import com.skylerdache.spacepong.repositories.GameRepository;
-import com.skylerdache.spacepong.runnables.GameThread;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
+import com.skylerdache.spacepong.threads.GameRunner;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.concurrent.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 @Service
 public class GameService {
     private final GameRepository gameRepository;
-    private final HashMap<Long, GameThread> games;
-    private final SimpMessagingTemplate template;
+    private final HashMap<Long, GameState> games;
+    private final ScheduledExecutorService gameExecutor;
+    private static final int POOL_SIZE = 1;
+    private static final double TICK_TIME_SECONDS = 0.1;
 
-    public GameService(GameRepository gameRepository, SimpMessagingTemplate template) {
+    public GameService(GameRepository gameRepository) {
         this.gameRepository = gameRepository;
-        games = new HashMap<Long, GameThread>();
-        this.template = template;
+        games = new HashMap<>();
+        gameExecutor = Executors.newScheduledThreadPool(POOL_SIZE);
+        GameRunner ticker = new GameRunner(this, games, TICK_TIME_SECONDS);
+        gameExecutor.schedule(ticker, 100, TimeUnit.MILLISECONDS);
     }
-    public Game startNewGame(Player p1, Player p2) {
-        Game newGame = new Game();
+    public void startGame(@NotNull Player p1, @NotNull Player p2, GameOptions options) {
+        GameEntity newGame = new GameEntity();
         newGame.setPlayer1(p1);
         newGame.setPlayer2(p2);
-        Game savedGame = gameRepository.save(newGame);
-        long id = savedGame.getId();
-        GameThread newGameThread = new GameThread(id,10, this, template);
-        newGameThread.start();
-        games.put(id, newGameThread);
-        return savedGame;
+        newGame.setOptions(options);
+        GameEntity savedGame = gameRepository.save(newGame);
+        long gameId = savedGame.getId();
+        GameState game = new GameState(options, p1, p2, savedGame);
+        games.put(gameId,game);
     }
     public GameStateDto getGameState(long gameId) {
-        return games.get(gameId).gameState();
-    }
-    public void saveScore(long gameId) {
-        Optional<Game> o = gameRepository.findById(gameId);
-        if (o.isEmpty()) {
-            throw new Error("Game does not exist");
-        }
-        Game g = o.get();
-        GameThread gt = games.get(gameId);
-        g.setP1Score(gt.getP1Score());
-        g.setP2Score(gt.getP2Score());
-        g.setEndTime(Instant.now());
-        gameRepository.save(g);
+        return games.get(gameId).getGameState();
     }
 
-    public List<Game> getAll() {
+    public List<GameEntity> getAll() {
         return StreamSupport.stream(gameRepository.findAll().spliterator(), false).toList();
     }
 
-    public Game getOngoingGameByPlayer(Player p) throws NoSuchGameException {
-        Optional<Game> g = Stream.concat(
+    public GameEntity getOngoingGameByPlayer(Player p) throws NoSuchGameException {
+        Optional<GameEntity> g = Stream.concat(
             gameRepository.findGamesByPlayer1(p).stream(),
             gameRepository.findGamesByPlayer2(p).stream()
         )
-        .filter((Game gg)->gg.getEndTime()==null)
-        .max(Comparator.comparing(Game::getStartTime));
+        .filter((GameEntity gg)->gg.getEndTime()==null)
+        .max(Comparator.comparing(GameEntity::getStartTime));
         if (g.isPresent()) return g.get();
         else throw new NoSuchGameException();
     }
-    public List<Game> getGamesByPlayer(Player p) {
+    public List<GameEntity> getGamesByPlayer(Player p) {
         return Stream.concat(
             gameRepository.findGamesByPlayer1(p).stream(),
             gameRepository.findGamesByPlayer2(p).stream()
         ).toList();
+    }
+
+
+    public void notifyGameOver(GameEntity g, PlayerPosition winner) {
+        games.remove(g.getId());
+        gameRepository.save(g);
+    }
+
+    public void sendControlMessage(HumanPlayer p, PlayerControlMessage msg) {
     }
 }

@@ -1,27 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8">
     <title>Login</title>
     <link rel="stylesheet" th:href="@{/css/style.css}" href="../static/css/style.css">
-</head>
-<body>
-<p>Login</p>
-<form name='f' th:action="@{/login}" method='post'>
-    <div th:if="${param.error}" class="alert alert-error">Invalid username and/or password.</div>
-    <table style="border: none;">
-        <tr>
-            <td><label for="username">User:</label></td>
-            <td><input id="username" type='text' name='username'></td>
-        </tr>
-        <tr>
-            <td><label for="password">Password:</label></td>
-            <td><input id="password" type='password' name='password'></td>
-        </tr>
-        <tr>
-            <td><input name="submit" type="submit" value="submit" /></td>
-        </tr>
-    </table>
-</form>
-</body>
+  </head>
+  <body>
+    <div class="main-container">
+      <div class="main-content">
+        <p>Login</p>
+        <form name='f' th:action="@{/login}" method='post'>
+          <div th:if="${param.error}" class="alert alert-error">Invalid username and/or password.</div>
+          <table style="border: none;">
+            <tr>
+              <td><label for="username">User:</label></td>
+              <td><input id="username" type='text' name='username'></td>
+            </tr>
+            <tr>
+              <td><label for="password">Password:</label></td>
+              <td><input id="password" type='password' name='password'></td>
+            </tr>
+            <tr>
+              <td><input name="submit" type="submit" value="submit" /></td>
+            </tr>
+          </table>
+        </form>
+        <hr>
+        <p>(Psssst..... Default logins are:)</p>
+        <table class="default-logins">
+          <thead>
+          <td>username</td><td>password</td>
+          </thead>
+          <tbody>
+          <tr><td>user1</td><td>pass</td></tr>
+          <tr><td>user2</td><td>pass</td></tr>
+          <tr><td>user3</td><td>pass</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="sidebar visibility-hidden">
+        <p>Online Users:</p>
+        <p class="disconnected">Disconnected</p>
+        <p class="disconnected"><a href="#" onclick="reconnect()">(click here to reconnect)</a></p>
+        <p class="connected">Connected</p>
+        <p class="connection-pending">Connecting...</p>
+        <ul class="online-users-list"></ul>
+        <p class="disconnected" hidden>User List not updating</p>
+      </div>
+    </div>
+  </body>
 </html>

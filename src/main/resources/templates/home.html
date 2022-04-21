@@ -1,20 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="utf-8">
     <title>Space Pong</title>
     <link rel="stylesheet" th:href="@{/css/style.css}" href="../static/css/style.css">
-</head>
-<body>
-<div>
-    <h1>Space Pong</h1>
-    <p th:text="${welcomeMessage}">Welcome</p>
-    <p><a th:href="@{/login}" th:if="${unauthenticated}">Login</a></p>
-    <p><a th:href="@{/register}" th:if="${unauthenticated}">Register</a></p>
-    <p><a th:href="@{/setup_game}" th:if="${username}">Start Game</a></p>
-    <p><a th:href="@{/logout}" th:if="${username}">Logout</a></p>
-    <p>Check out the database:</p>
-    <p><a th:href="@{/h2}">H2 Console</a></p>
-</div>
-</body>
+    <script th:if="${username}" th:src="@{/js/monitor_presence.js}" src="../static/js/monitor_presence.js"></script>
+  </head>
+  <body>
+    <div class="main-container">
+      <div class="main-content">
+        <h1>Space Pong</h1>
+        <p th:text="${welcomeMessage}">Welcome</p>
+        <p><a th:href="@{/login}" th:if="${unauthenticated}" href="login.html">Login</a></p>
+        <p><a th:href="@{/register}" th:if="${unauthenticated}" href="register.html">Register</a></p>
+        <p><a th:href="@{/setup_game}" th:if="${username}" href="setup_game.html">Start Game</a></p>
+        <p><a th:href="@{/logout}" th:if="${username}">Logout</a></p>
+        <p>Check out the database:</p>
+        <p><a th:href="@{/h2}" href="./h2">H2 Console</a></p>
+      </div>
+      <div class="sidebar visibility-hidden">
+        <p>Online Users:</p>
+        <p class="disconnected">Disconnected</p>
+        <p class="disconnected"><a href="#" onclick="reconnect()">(click here to reconnect)</a></p>
+        <p class="connected">Connected</p>
+        <p class="connection-pending">Connecting...</p>
+        <ul class="online-users-list">
+        </ul>
+        <p class="disconnected" hidden>User List not updating</p>
+      </div>
+    </div>
+  </body>
 </html>

@@ -14,6 +14,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PlayerService implements UserDetailsService {
@@ -33,7 +34,7 @@ public class PlayerService implements UserDetailsService {
         HumanPlayer p = new HumanPlayer();
         p.setUsername(newPlayer.getUsername());
         p.setPassword(passwordEncoder.encode(newPlayer.getPassword()));
-        p.setPaddleColor(Color.decode(newPlayer.getColorHex()));
+        p.setPaddleColor(newPlayer.getColorHex());
         playerRepository.save(p);
     }
 
@@ -47,5 +48,9 @@ public class PlayerService implements UserDetailsService {
     }
     public List<Player> getOnlineUsers() {
         return new ArrayList<Player>((Collection<? extends Player>) playerRepository.findAll());
+    }
+
+    public Optional<Player> getPlayerById(int opponentId) {
+        return playerRepository.findById((long) opponentId);
     }
 }

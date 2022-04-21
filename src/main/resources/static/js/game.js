@@ -13,6 +13,7 @@ let upDownArrowState = "none";
 let vx = 0;
 let vz = 0;
 let stompClient;
+let socket;
 function setCameraP1() {
     camera.up.set(0,0,1);
     camera.position.y = -100;
@@ -175,30 +176,18 @@ function setKeyHandler() {
 }
 
 async function setupWebSockets() {
-    stompClient = Stomp.client("ws://localhost:8080/ws");
-    await new Promise((resolve, reject) => stompClient.connect("user1","pass", (arg)=>{
-        console.log("stompClient.connect() suceded!");
-        console.log("arg is:");
-        resolve(arg);
-    }, (err)=>{
-        console.log("stompClient.connect() failed");
-        console.log("error is:");
-        console.log(err);
-        reject(err);
-    }));
-    let messageCount = 0;
-    let subscription;
-    await new Promise((resolve)=>{
-        subscription = stompClient.subscribe("/topic/game1",(message) =>{
-            console.log(message);
-            messageCount++;
-            if (messageCount >= 10) {resolve();}
-        });
-        console.log("subscribed with id: "+subscription.id);
+    socket = new WebSocket("ws://localhost:8080/gameConnect");
+    socket.addEventListener("open", async function(event) {
+        console.log("socket opened, sent 'hello server' to server.");
+        console.log("event:");
+        console.log(event);
+        socket.send("hello server!");
     });
-    subscription.unsubscribe();
-    await new Promise((res)=>stompClient.disconnect(res));
-    console.log("all messages received, disconnected;");
+    socket.addEventListener("message", async function(event) {
+        console.log("message from server:");
+        console.log(event.data);
+    });
+
 }
 
 async function start() {

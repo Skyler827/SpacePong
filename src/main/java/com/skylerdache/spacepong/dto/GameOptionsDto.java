@@ -1,6 +1,5 @@
 package com.skylerdache.spacepong.dto;
 
-import com.skylerdache.spacepong.entities.Player;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,8 +9,11 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class GameSetupDto {
-    private long opponentId;
+public class GameOptionsDto {
+    private int length = 100;
+    private int width = 100;
+    private int height = 100;
+    private int opponentId = 2;
     private int scoreThreshold = 10;
     private boolean isTimeLimited = true;
     private int timeLimitMinutes = 3;

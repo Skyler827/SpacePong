@@ -7,6 +7,36 @@ body {
     margin: 0;
     height: 100vh;
 }
+.main-container {
+    display: flex;
+    justify-content: space-between;
+    border: 1px solid black;
+    max-width: 1000px;
+    margin: 0 auto;
+    /*gap: 10px;*/
+}
+.main-content {
+    border: 1px solid black;
+    margin: 10px;
+    padding: 10px;
+    flex-grow: 1;
+}
+.sidebar {
+    border: 1px solid black;
+    margin: 10px 10px 10px 0;
+    padding: 10px;
+}
+.visibility-hidden {
+    visibility: hidden;
+}
+.display-none {
+    display: none;
+}
+.default-logins, .default-logins td {
+    border: 1px solid black;
+    border-collapse: collapse;
+    padding: 5px;
+}
 #game-page-container {
     display: flex;
     flex-direction: column;

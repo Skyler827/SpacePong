@@ -1,53 +1,60 @@
 package com.skylerdache.spacepong.game_elements;
 
+import com.skylerdache.spacepong.enums.PlayerPosition;
 import com.skylerdache.spacepong.exceptions.PlayerScoreException;
-import com.skylerdache.spacepong.runnables.GameThread;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 public class Ball {
-    private final GameThread gameThread;
     private final double radius;
+    private final SpaceBounds bounds;
     private double x = 0;
     private double y = 0;
     private double z = 0;
     private double vx = 1;
     private double vy = 1;
     private double vz = 1;
-    public Ball(GameThread gameThread, double radius) {
-        this.gameThread = gameThread;
+    public Ball(double radius, SpaceBounds spaceBounds) {
         this.radius = radius;
+        this.bounds = spaceBounds;
     }
-    public void tick(double dt) throws PlayerScoreException {
-        //bounce logic:
-        if (x+dt*vx > GameThread.X_MAX) {
-            x = 2*GameThread.X_MAX - x - vx*dt;
+    public void tick(double dt, Paddle p1Paddle, Paddle p2Paddle) throws PlayerScoreException {
+        // bounce logic:
+        // X axis (positive X is p1's right, p2's left) :
+        if (x + dt*vx + radius > bounds.XMax()) { //above max, bounce down:
+            x = 2*bounds.XMax() - x - vx*dt;
         }
-        else if (x+dt*vx < GameThread.X_MIN) {
-            x = 2*GameThread.X_MIN - x - vx*dt;
-        } else {
+        else if (x + dt*vx - radius < bounds.XMin()) { //below min, bounce up:
+            x = 2*bounds.XMin() - x - vx*dt;
+        } else { //within range:
             x += dt * vx;
         }
-        if (y+dt*vy > GameThread.Y_MAX) {
-            y = 2*GameThread.Y_MAX - y - vy*dt;
-        } else if (y+dt*vy < GameThread.Y_MIN) {
-            y = 2*GameThread.Y_MIN - y - vy*dt;
-        } else {
+        // Y axis (positive Y is up, negative Y is down):
+        if (y + dt*vy + radius > bounds.YMax()) { //above max, bounce down:
+            y = 2 * bounds.YMax() - y - vy*dt;
+        } else if (y + dt*vy - radius < bounds.YMin()) { //below min, bounce down:
+            y = 2 * bounds.YMin() - y - vy*dt;
+        } else { //within range:
             y += dt * vy;
         }
-        if (z + dt*vz > GameThread.Z_MAX) {
-            z = 2*GameThread.Z_MAX - z - vz*dt;
-        } else if (z+dt*vz < GameThread.Z_MIN) {
-            z = 2*GameThread.Z_MIN - z - vz*dt;
-        } else {
+        // Z axis (positive Z is towards P2, negative Z is towards P1):
+        if (z + dt*vz + radius > bounds.ZMax()) { //above max, check for collision with p2's paddle:
+            if (p2Paddle.ballInRange(this)) {
+                z = 2*bounds.ZMax() - z - vz*dt;
+            } else {
+                throw new PlayerScoreException(PlayerPosition.P1);
+            }
+        } else if (z + dt*vz - radius < bounds.ZMin()) { //below min, check for collision with p1's paddle:
+            if (p1Paddle.ballInRange(this)) {
+                z = 2*bounds.ZMin() - z - vz*dt;
+            } else {
+                throw new PlayerScoreException(PlayerPosition.P2);
+            }
+        } else { //within range:
             z += dt * vz;
         }
-        if (z > GameThread.Z_MAX)
-            throw new PlayerScoreException(PlayerScoreException.Player.P1);
-        if (z < GameThread.Z_MIN)
-            throw new PlayerScoreException(PlayerScoreException.Player.P2);
     }
 
     public String getPosition() {

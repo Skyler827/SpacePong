@@ -1,11 +1,10 @@
 package com.skylerdache.spacepong.controllers;
 
 import com.skylerdache.spacepong.dto.GameStateDto;
-import com.skylerdache.spacepong.entities.Game;
+import com.skylerdache.spacepong.entities.GameEntity;
 import com.skylerdache.spacepong.services.GameService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -18,7 +17,7 @@ public class GameRestController {
     }
 
     @GetMapping("/restgames")
-    List<Game> all() {
+    List<GameEntity> all() {
         return gameService.getAll();
     }
     @GetMapping("/restgames/{id}")

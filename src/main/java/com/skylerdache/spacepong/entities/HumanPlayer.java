@@ -1,14 +1,21 @@
 package com.skylerdache.spacepong.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.skylerdache.spacepong.dto.GameStateDto;
+import com.skylerdache.spacepong.game_elements.PlayerControlState;
 import lombok.Getter;
 import lombok.Setter;
+import nonapi.io.github.classgraph.json.JSONSerializer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.Transient;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 

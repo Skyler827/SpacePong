@@ -1,27 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>New Game</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}" href="../static/css/style.css">
-    <script th:src="@{/js/setup_game.js}" src="../static/js/setup_game.js"></script>
+  <meta charset="UTF-8">
+  <title>New Game</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}" href="../static/css/style.css">
+  <script th:src="@{/js/setup_game.js}" src="../static/js/setup_game.js"></script>
 </head>
 <body>
+<div class="main-container">
+  <div class="main-content">
     <h1>Start New Game</h1>
     <p>Enter Settings for new game:</p>
     <form th:action="@{/setup_game}" th:object="${gameSetupDto}" method="post">
-        <label for="hlength">Horizontal length:</label> <input id="hlength" type="text">
-        <div>
-            <label for="opponent-name">Opponent:</label>
-        </div>
-        <div>
-            <select id="opponent-name" th:field="*{opponentId}" th:size="${playersSize}">
-                <option th:each="player : ${players}" th:text="${player.username}" th:value="${player.id}"></option>
-            </select>
-        </div>
-        <div>
-            <input id="submit" type="submit" value="Start New Game" disabled>
-        </div>
+      <div>
+        <label for="length">Pong space length:</label>
+        <input th:field="*{length}" id="length" type="number">
+      </div>
+      <div>
+        <label for="width">Pong space width:</label>
+        <input th:field="*{width}" id="width" type="number">
+      </div>
+      <div>
+        <label for="height">Pong space height:</label>
+        <input th:field="*{height}" id="height" type="number">
+      </div>
+      <div>
+        <label for="opponent-name">Opponent:</label>
+      </div>
+      <div>
+        <select id="opponent-name" th:field="*{opponentId}" th:size="${playersSize}">
+          <option disabled selected value="0"> -- select an opponent -- </option>
+          <option th:each="player : ${players}" th:text="${player.username}" th:value="${player.id}"></option>
+        </select>
+      </div>
+      <div>
+        <input id="submit" type="submit" value="Start New Game">
+      </div>
     </form>
+  </div>
+</div>
 </body>
 </html>

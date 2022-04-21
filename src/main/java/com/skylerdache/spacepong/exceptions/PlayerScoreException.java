@@ -1,7 +1,8 @@
 package com.skylerdache.spacepong.exceptions;
 
+import com.skylerdache.spacepong.enums.PlayerPosition;
+
 public class PlayerScoreException extends Exception{
-    public enum Player {P1, P2}
-    public Player scorer;
-    public PlayerScoreException(Player scorer) { this.scorer = scorer; }
+    public PlayerPosition scorer;
+    public PlayerScoreException(PlayerPosition scorer) { this.scorer = scorer; }
 }

@@ -2,10 +2,7 @@ package com.skylerdache.spacepong.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -25,7 +22,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .headers()
                 .frameOptions().sameOrigin().and()
             .authorizeRequests()
-                .antMatchers("/login", "/register", "/h2/**", "/css/*", "/js/**").permitAll()
+                .antMatchers(
+                        "/", "/login", "/register", "/h2/**", "/css/*", "/js/**",
+                        "/register_presence"
+                ).permitAll()
                 .anyRequest().authenticated()
                 .and()
             .formLogin((form) -> form.loginPage("/login").permitAll())
@@ -34,17 +34,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .logoutSuccessUrl("/")
                 .permitAll();
     }
-//    protected void configure(AuthenticationManagerBuilder auth, PasswordEncoder encoder) throws Exception{
-//        auth.
-//                inMemoryAuthentication()
-//                .withUser("user")
-//                .password(encoder.encode("password"))
-//                .roles("USER")
-//                .and()
-//                .withUser("admin")
-//                .password(encoder.encode("password"))
-//                .roles("ADMIN");
-//    }
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

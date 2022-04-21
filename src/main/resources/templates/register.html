@@ -3,18 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <title>Register</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}" href="../static/css/style.css">
 </head>
 <body>
-<p>Sign up</p>
-<form th:action="@{/register}" th:object="${playerdto}" method="post">
-    <p><label for="username">Username: </label>
-        <input id="username" name="username" type="text" th:field="*{username}"></p>
-    <p><label for="password">Password: </label>
-        <input id="password" name="password" type="password" th:field="*{password}"></p>
-    <p><label for="color">Paddle Color: </label>
-        <input id="color" type="color" name="paddleColor" th:field="*{colorHex}"></p>
-    <p><input type="submit" value="Submit Registration"></p>
-</form>
+<div class="main-container">
+    <div class="main-content">
+        <p>Sign up</p>
+        <form th:action="@{/register}" th:object="${playerdto}" method="post">
+            <p><label for="username">Username: </label>
+                <input id="username" name="username" type="text" th:field="*{username}"></p>
+            <p><label for="password">Password: </label>
+                <input id="password" name="password" type="password" th:field="*{password}"></p>
+            <p><label for="color">Paddle Color: </label>
+                <input id="color" type="color" name="paddleColor" th:field="*{colorHex}"></p>
+            <p><input type="submit" value="Submit Registration"></p>
+        </form>
+    </div>
+</div>
 </body>
 </html>

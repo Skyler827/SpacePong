@@ -1,11 +1,10 @@
 package com.skylerdache.spacepong.controllers;
 
-import com.skylerdache.spacepong.entities.Game;
+import com.skylerdache.spacepong.entities.GameEntity;
 import com.skylerdache.spacepong.entities.Player;
 import com.skylerdache.spacepong.exceptions.NoSuchGameException;
 import com.skylerdache.spacepong.services.GameService;
 import com.skylerdache.spacepong.services.PlayerService;
-import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +22,7 @@ public class GameController {
     }
     @GetMapping("/game")
     public String getGame(Model model, RedirectAttributes attributes, Principal principal) {
-        final Game game = (Game) attributes.getFlashAttributes().get("game");
+        final GameEntity game = (GameEntity) attributes.getFlashAttributes().get("game");
         if (game == null) {
             try {
                 Player p = playerService.getPlayerByName(principal.getName());
@@ -39,6 +38,4 @@ public class GameController {
         }
         return "game";
     }
-    @MessageMapping()
-    public void handleMessage() {}
 }

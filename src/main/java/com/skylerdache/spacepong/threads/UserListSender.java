@@ -57,14 +57,13 @@ public class UserListSender extends Thread {
         String playerData = JSONSerializer.serializeObject(playerSessions.keySet().stream().toList());
         //noinspection InfiniteLoopStatement
         while (true) {
-            System.out.println("sending the following JSON data to players:");
-            System.out.println(playerData);
             if (!newSessions.isEmpty()) {
                 synchronized(newSessions) {
                     if (!newSessions.isEmpty()) {
                         playerSessions.putAll(newSessions);
-                        Stream<String> onlinePlayersStream = playerSessions.keySet().stream().map(Player::getJson);
-                        onlineService.setOnlinePlayersJSON(combineToJsonList(onlinePlayersStream));
+                        playerData = combineToJsonList(playerSessions.keySet().stream().map(HumanPlayer::getJson));
+                        System.out.println("new playerData: "+playerData);
+                        onlineService.setOnlinePlayersJSON(playerData);
                         newSessions.clear();
                     }
                 }
@@ -73,8 +72,6 @@ public class UserListSender extends Thread {
                 synchronized(disconnectingPlayers) {
                     if (!disconnectingPlayers.isEmpty()) {
                         disconnectingPlayers.forEach(playerSessions::remove);
-                        String onlinePlayersJson = JSONSerializer.serializeObject(playerSessions.keySet().stream().toList());
-                        onlineService.setOnlinePlayersJSON(onlinePlayersJson);
                         disconnectingPlayers.clear();
                     }
                 }
@@ -96,10 +93,12 @@ public class UserListSender extends Thread {
                 }
             }
             ArrayList<HumanPlayer> usersToRemove = new ArrayList<>();
-            System.out.println("sending JSON data");
+            String finalPlayerData = playerData;
+//            System.out.println("sending the following JSON data to players:");
+//            System.out.println(finalPlayerData);
             playerSessions.forEach((HumanPlayer p, WebSocketSession s) -> {
                 try {
-                    s.sendMessage(new TextMessage(playerData));
+                    s.sendMessage(new TextMessage(finalPlayerData));
                 } catch (IOException e) {
                     usersToRemove.add(p);
                     System.out.println("caught exception here");

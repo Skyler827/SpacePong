@@ -5,6 +5,7 @@ import com.skylerdache.spacepong.entities.Player;
 import com.skylerdache.spacepong.services.OnlineService;
 import lombok.Getter;
 import nonapi.io.github.classgraph.json.JSONSerializer;
+import org.json.JSONArray;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -54,14 +55,16 @@ public class UserListSender extends Thread {
         return "["+resultsWithoutLeadingComma+"]";
     }
     public void run() {
-        String playerData = JSONSerializer.serializeObject(playerSessions.keySet().stream().toList());
+        String playerData = "[]";
         //noinspection InfiniteLoopStatement
         while (true) {
             if (!newSessions.isEmpty()) {
                 synchronized(newSessions) {
                     if (!newSessions.isEmpty()) {
                         playerSessions.putAll(newSessions);
-                        playerData = combineToJsonList(playerSessions.keySet().stream().map(HumanPlayer::getJson));
+                        JSONArray data = new JSONArray();
+                        playerSessions.forEach((h,s)->data.put(h.getHashMap()));
+                        playerData = data.toString();
                         System.out.println("new playerData: "+playerData);
                         onlineService.setOnlinePlayersJSON(playerData);
                         newSessions.clear();

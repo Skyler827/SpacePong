@@ -5,9 +5,13 @@ import com.skylerdache.spacepong.game_elements.PlayerControlState;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.persistence.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 @Inheritance(strategy=InheritanceType.JOINED)
@@ -53,11 +57,11 @@ public abstract class Player {
         paddleColorGreen = Short.parseShort(htmlHexColor.substring(3,5), 16);
         paddleColorBlue = Short.parseShort(htmlHexColor.substring(5,7), 16);
     }
-    public String getJson() {
-        return "{" +
-            "\"id\":"+id +","+
-            "\"username\":"+username+","+
-            "\"color\":\""+getHexColor()+"\","+
-        "}";
+    public Map<String, Object> getHashMap() {
+        Map<String, Object> result = new HashMap<>();
+        result.put("id",id);
+        result.put("username", username);
+        result.put("color",getHexColor());
+        return result;
     }
 }

@@ -25,6 +25,7 @@ body {
     border: 1px solid black;
     margin: 10px 10px 10px 0;
     padding: 10px;
+    min-width: 200px;
 }
 .visibility-hidden {
     visibility: hidden;

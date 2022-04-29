@@ -32,12 +32,14 @@ public class SetupGameController {
     @GetMapping
     public String getSetupGame(Model model, RedirectAttributes attributes) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        List<Player> otherPlayers = onlineService.getPlayers().stream()
-            .filter((HumanPlayer p) -> !p.getUsername().equals(auth.getName()))
+        List<HumanPlayer> otherPlayers = onlineService.getPlayers().stream()
+            .filter((String username) -> !username.equals(auth.getName()))
+            .map(playerService::getHumanPlayerByName)
             .collect(Collectors.toList());
         if (otherPlayers.size() == 0) {
-            System.out.println("cannot start game with no other players to play against");
-            attributes.addFlashAttribute("warning", "cannot start game with no other players to play against");
+            String warningMessage = "cannot start game with no other players to play against";
+            System.out.println(warningMessage);
+            attributes.addFlashAttribute("warning", warningMessage);
             return "redirect:/";
         }
         else {

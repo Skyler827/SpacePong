@@ -46,7 +46,7 @@ public class OnlineHandler extends TextWebSocketHandler {
         if (message.getPayload().equals("CONNECT")) {
             onlineService.addNewPlayer(p, session);
         } else if (message.getPayload().equals("DISCONNECT")) {
-            onlineService.removeSession(p);
+            onlineService.removeSession(p, session);
         } else {
             System.out.println("no match");
         }
@@ -59,7 +59,7 @@ public class OnlineHandler extends TextWebSocketHandler {
         String userName = principal.getName();
         HumanPlayer p = (HumanPlayer) playerService.getPlayerByName(userName);
         System.out.println("removing session...");
-        onlineService.removeSession(p);
+        onlineService.removeSession(p, session);
     }
     @Override
     public void handleTransportError(@NotNull WebSocketSession session, @NotNull Throwable exception) {

@@ -3,6 +3,7 @@ package com.skylerdache.spacepong.services;
 import com.skylerdache.spacepong.dto.PlayerDto;
 import com.skylerdache.spacepong.entities.HumanPlayer;
 import com.skylerdache.spacepong.entities.Player;
+import com.skylerdache.spacepong.repositories.HumanPlayerRepository;
 import com.skylerdache.spacepong.repositories.PlayerRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -10,7 +11,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -19,10 +19,12 @@ import java.util.Optional;
 @Service
 public class PlayerService implements UserDetailsService {
     private final PlayerRepository playerRepository;
+    private final HumanPlayerRepository humanPlayerRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public PlayerService(PlayerRepository playerRepository, PasswordEncoder passwordEncoder) {
+    public PlayerService(PlayerRepository playerRepository, HumanPlayerRepository humanPlayerRepository, PasswordEncoder passwordEncoder) {
         this.playerRepository = playerRepository;
+        this.humanPlayerRepository = humanPlayerRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -30,6 +32,9 @@ public class PlayerService implements UserDetailsService {
         return playerRepository.findPlayerByUsername(username);
     }
 
+    public HumanPlayer getHumanPlayerByName(String username) {
+        return humanPlayerRepository.getHumanPlayerByUsername(username);
+    }
     public void registerNewPlayer(PlayerDto newPlayer) {
         HumanPlayer p = new HumanPlayer();
         p.setUsername(newPlayer.getUsername());

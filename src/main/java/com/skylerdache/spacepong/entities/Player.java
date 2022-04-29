@@ -64,4 +64,11 @@ public abstract class Player {
         result.put("color",getHexColor());
         return result;
     }
+    public String getJson() {
+        return "{"+
+            "\"id\":\""+id+"\","+
+            "\"username\":\""+username+"\","+
+            "\"color\":\""+getHexColor()+"\""+
+        "}";
+    }
 }

@@ -14,6 +14,12 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+    private final CustomLogoutHandler logoutHandler;
+
+    public SecurityConfig(CustomLogoutHandler logoutHandler) {
+        this.logoutHandler = logoutHandler;
+    }
+
     protected void configure (HttpSecurity http) throws Exception {
         http
             .csrf()
@@ -31,6 +37,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .formLogin((form) -> form.loginPage("/login").permitAll())
             .logout()
                 .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+                .addLogoutHandler(logoutHandler)
                 .logoutSuccessUrl("/")
                 .permitAll();
     }

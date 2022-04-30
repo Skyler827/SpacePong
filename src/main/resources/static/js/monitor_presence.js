@@ -70,48 +70,54 @@ function handleUpdatedUserList(updatedUserList) {
     }
 }
 function handleNewGameRequest(newGameData) {
-    const newDiv = document.createElement("div");
+    const requestedGames = document.querySelector(".requested-games");
+    const notificationDiv = document.createElement("div");
+    requestedGames.append(notificationDiv);
+    requestedGames.classList.remove("display-none");
 
     const p1 = document.createElement("p");
+    notificationDiv.append(p1);
     p1.textContent = "New Game Request:";
-    newDiv.append(p1);
 
     const p2 = document.createElement("p");
+    notificationDiv.append(p2);
     p2.textContent = "User: "+newGameData.proposer;
-    newDiv.append(p2);
 
     const ul = document.createElement("ul");
+    notificationDiv.append(ul);
     const li1 = document.createElement("li");
+    ul.append(li1);
     if (newGameData.isTimeLimited) {
-        li1.textContent = "Time Limit: "+ newGameData.timeLimit;
+        li1.textContent = "Time Limit: "+ newGameData.timeLimit+" minutes";
     } else {
         li1.textContent = "Time Limit: none";
     }
-    ul.append(li1);
     const li2 = document.createElement("li");
-    li2.textContent = "User: "+newGameData.proposer;
     ul.append(li2);
-    newDiv.append(ul);
+    li2.textContent = "User: "+newGameData.proposer;
 
     const buttonContainer = document.createElement("div");
+    notificationDiv.append(buttonContainer);
     buttonContainer.classList.add("accept-reject-buttons");
+
     const acceptButton = document.createElement("button");
+    buttonContainer.append(acceptButton);
     acceptButton.textContent = "Accept";
-    acceptButton.id = "accept-form-"+newGameData.proposer;
+    acceptButton.id = "accept-form-"+encodeURIComponent(newGameData.proposer);
+
     const rejectButton = document.createElement("button");
+    buttonContainer.append(rejectButton);
     rejectButton.textContent = "Reject";
     rejectButton.form = "reject-form-"+newGameData.proposer;
-    buttonContainer.append(acceptButton);
-    buttonContainer.append(rejectButton);
-    newDiv.append(buttonContainer);
 
     const acceptForm = document.createElement("form");
-    acceptForm.id = "accept-form-"+newGameData.proposer;
+    notificationDiv.append(acceptForm);
+    acceptForm.id = "accept-form-"+encodeURIComponent(newGameData.proposer);
     acceptForm.action = "/handle_proposal/accept?username="+encodeURIComponent(newGameData.proposer);
     acceptForm.method = "POST";
-    newDiv.append(acceptForm);
 
     const rejectForm = document.createElement("form");
+    notificationDiv.append(rejectForm);
     rejectForm.id = "reject-form-"+newGameData.proposer;
     rejectForm.addEventListener("click",function(event) {
         event.preventDefault();
@@ -122,14 +128,8 @@ function handleNewGameRequest(newGameData) {
         const newSpan = document.createElement("span");
         newSpan.innerText = "Rejecting request...";
         buttonContainer.append(newSpan);
-        request.addEventListener("load", ()=>newDiv.remove());
+        request.addEventListener("load", ()=>notificationDiv.remove());
     });
-    newDiv.append(rejectForm);
-
-    const requestedGames = document.querySelector(".requested-games");
-    requestedGames.append(newDiv);
-    requestedGames.classList.remove("display-none");
-
 }
 function handleGameStartSignal() {
     location.href = "/game";

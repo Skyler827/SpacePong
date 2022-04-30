@@ -19,16 +19,16 @@ public class GameOptions {
     private boolean isTimeLimited = true;
     @Transient
     @ManyToOne
-    private Player p1;
+    private Player proposer;
     @Transient
     @ManyToOne
-    private Player p2;
+    private Player subject;
 
     public GameOptions(HumanPlayer proposer, HumanPlayer subject, GameOptionsDto options) {
-        this.setP1(proposer);
-        this.setP2(subject);
+        this.setProposer(proposer);
+        this.setSubject(subject);
         this.setScoreThreshold(options.getScoreThreshold());
-        this.setTimeLimited(options.isTimeLimited());
+        this.setTimeLimited(options.getIsTimeLimited().equals("true"));
         this.setTimeLimitMinutes(options.getTimeLimitMinutes());
     }
 }

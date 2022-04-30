@@ -15,6 +15,6 @@ public class GameOptionsDto {
     private int height = 100;
     private int opponentId = 2;
     private int scoreThreshold = 10;
-    private boolean isTimeLimited = true;
+    private String isTimeLimited = "true";
     private int timeLimitMinutes = 3;
 }

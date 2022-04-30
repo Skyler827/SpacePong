@@ -1,6 +1,7 @@
 .alert,
 .alert-error {
-    border: 2px solid red;
+    color: white;
+    background-color: red;
 }
 body {
     background-color:lightblue;
@@ -14,6 +15,20 @@ body {
     max-width: 1000px;
     margin: 0 auto;
     /*gap: 10px;*/
+}
+.requested-games {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-gap: 5px;
+}
+.requested-games > div {
+    border: 1px solid black;
+}
+.requested-games div.accept-reject-buttons {
+    text-align: center;
+    padding-bottom: 10px;
 }
 .main-content {
     border: 1px solid black;

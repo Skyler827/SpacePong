@@ -25,6 +25,17 @@
         <input th:field="*{height}" id="height" type="number">
       </div>
       <div>
+        <label for="is-time-limited">Time Limited:</label>
+        <select th:field="*{isTimeLimited}" id="is-time-limited">
+          <option value="true" th:value="true">Yes</option>
+          <option value="false" th:value="false">No</option>
+        </select>
+      </div>
+      <div>
+        <label for="time-limit-minutes">Time Limit:</label>
+        <input th:field="*{timeLimitMinutes}" id="time-limit-minutes" type="number">
+      </div>
+      <div>
         <label for="opponent-name">Opponent:</label>
       </div>
       <div>

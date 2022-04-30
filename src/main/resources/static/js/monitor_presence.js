@@ -44,7 +44,7 @@ async function handleData(message) {
             handleUpdatedUserList(parsedMessage.data);
             break;
         case "notify_game_request":
-            alert("new game requested:"+parsedMessage.data.proposer);
+            handleNewGameRequest(parsedMessage.data)
             console.log("new game requested:");
             console.log(parsedMessage.data);
             break;
@@ -68,6 +68,68 @@ function handleUpdatedUserList(updatedUserList) {
         newLi.appendChild(newA);
         usersList.appendChild(newLi);
     }
+}
+function handleNewGameRequest(newGameData) {
+    const newDiv = document.createElement("div");
+
+    const p1 = document.createElement("p");
+    p1.textContent = "New Game Request:";
+    newDiv.append(p1);
+
+    const p2 = document.createElement("p");
+    p2.textContent = "User: "+newGameData.proposer;
+    newDiv.append(p2);
+
+    const ul = document.createElement("ul");
+    const li1 = document.createElement("li");
+    if (newGameData.isTimeLimited) {
+        li1.textContent = "Time Limit: "+ newGameData.timeLimit;
+    } else {
+        li1.textContent = "Time Limit: none";
+    }
+    ul.append(li1);
+    const li2 = document.createElement("li");
+    li2.textContent = "User: "+newGameData.proposer;
+    ul.append(li2);
+    newDiv.append(ul);
+
+    const buttonContainer = document.createElement("div");
+    buttonContainer.classList.add("accept-reject-buttons");
+    const acceptButton = document.createElement("button");
+    acceptButton.textContent = "Accept";
+    acceptButton.id = "accept-form-"+newGameData.proposer;
+    const rejectButton = document.createElement("button");
+    rejectButton.textContent = "Reject";
+    rejectButton.form = "reject-form-"+newGameData.proposer;
+    buttonContainer.append(acceptButton);
+    buttonContainer.append(rejectButton);
+    newDiv.append(buttonContainer);
+
+    const acceptForm = document.createElement("form");
+    acceptForm.id = "accept-form-"+newGameData.proposer;
+    acceptForm.action = "/handle_proposal/accept?username="+encodeURIComponent(newGameData.proposer);
+    acceptForm.method = "POST";
+    newDiv.append(acceptForm);
+
+    const rejectForm = document.createElement("form");
+    rejectForm.id = "reject-form-"+newGameData.proposer;
+    rejectForm.addEventListener("click",function(event) {
+        event.preventDefault();
+        const url = "/handle_proposal/reject?username="+encodeURIComponent(newGameData.proposer);
+        const request = new XMLHttpRequest();
+        request.open("POST", url, true);
+        rejectButton.remove();
+        const newSpan = document.createElement("span");
+        newSpan.innerText = "Rejecting request...";
+        buttonContainer.append(newSpan);
+        request.addEventListener("load", ()=>newDiv.remove());
+    });
+    newDiv.append(rejectForm);
+
+    const requestedGames = document.querySelector(".requested-games");
+    requestedGames.append(newDiv);
+    requestedGames.classList.remove("display-none");
+
 }
 function handleGameStartSignal() {
     location.href = "/game";

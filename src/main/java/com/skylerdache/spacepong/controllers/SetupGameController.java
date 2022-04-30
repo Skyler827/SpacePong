@@ -18,6 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Controller
@@ -52,10 +53,8 @@ public class SetupGameController {
     }
     @PostMapping
     public String postSetupGame(@ModelAttribute GameOptionsDto gameSetupDto, RedirectAttributes attributes, Principal principal) {
-        System.out.println(gameSetupDto.toString());
-        System.out.println("postSetupGame() called");
-        HumanPlayer user = (HumanPlayer) playerService.getPlayerByName(principal.getName());
-        Player opponent = playerService.getPlayerByName("user2");
+        HumanPlayer user = playerService.getHumanPlayerByName(principal.getName());
+        Player opponent = playerService.getPlayerById(gameSetupDto.getOpponentId()).orElseThrow();
         if (opponent instanceof HumanPlayer humanOpponent) {
             onlineService.proposeNewGame(user, humanOpponent, gameSetupDto);
             return "redirect:/waiting";

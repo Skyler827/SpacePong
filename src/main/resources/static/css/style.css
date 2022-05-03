@@ -30,6 +30,9 @@ body {
     text-align: center;
     padding-bottom: 10px;
 }
+.accept-reject-buttons form {
+    display: inline;
+}
 .main-content {
     border: 1px solid black;
     margin: 10px;

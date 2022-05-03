@@ -7,6 +7,8 @@ import com.skylerdache.spacepong.threads.UserListSender;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.util.Pair;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -79,5 +81,9 @@ public class OnlineService {
     }
     public void handleLogout(HumanPlayer p) {
         userListSender.getLoggingOutPlayers().add(p.getUsername());
+    }
+
+    public void rejectGame(HumanPlayer rejectingPlayer, HumanPlayer requestingPlayer) {
+        proposals.get(rejectingPlayer).remove(requestingPlayer);
     }
 }

@@ -51,6 +51,9 @@ async function handleData(message) {
         case "requested_game_start":
             handleGameStartSignal(parsedMessage.data);
             break;
+        case "game_reject":
+            handleGameRejected();
+            break;
         case undefined:
             console.log("message should have a type attribute");
             break;
@@ -100,25 +103,28 @@ function handleNewGameRequest(newGameData) {
     notificationDiv.append(buttonContainer);
     buttonContainer.classList.add("accept-reject-buttons");
 
-    const acceptButton = document.createElement("button");
-    buttonContainer.append(acceptButton);
-    acceptButton.textContent = "Accept";
-    acceptButton.id = "accept-form-"+encodeURIComponent(newGameData.proposer);
-
-    const rejectButton = document.createElement("button");
-    buttonContainer.append(rejectButton);
-    rejectButton.textContent = "Reject";
-    rejectButton.form = "reject-form-"+newGameData.proposer;
-
     const acceptForm = document.createElement("form");
-    notificationDiv.append(acceptForm);
-    acceptForm.id = "accept-form-"+encodeURIComponent(newGameData.proposer);
+    buttonContainer.append(acceptForm);
+    const acceptId = "accept-form-"+encodeURIComponent(newGameData.proposer);
+    acceptForm.id = acceptId;
     acceptForm.action = "/handle_proposal/accept?username="+encodeURIComponent(newGameData.proposer);
     acceptForm.method = "POST";
 
+    const acceptButton = document.createElement("button");
+    acceptForm.append(acceptButton);
+    acceptButton.textContent = "Accept";
+    acceptButton.form = acceptId;
+
     const rejectForm = document.createElement("form");
-    notificationDiv.append(rejectForm);
-    rejectForm.id = "reject-form-"+newGameData.proposer;
+    buttonContainer.append(rejectForm);
+    const rejectId = "reject-form-"+newGameData.proposer;
+    rejectForm.id = rejectId;
+
+    const rejectButton = document.createElement("button");
+    rejectForm.append(rejectButton);
+    rejectButton.textContent = "Reject";
+    rejectButton.form = rejectId;
+
     rejectForm.addEventListener("click",function(event) {
         event.preventDefault();
         const url = "/handle_proposal/reject?username="+encodeURIComponent(newGameData.proposer);
@@ -129,10 +135,21 @@ function handleNewGameRequest(newGameData) {
         newSpan.innerText = "Rejecting request...";
         buttonContainer.append(newSpan);
         request.addEventListener("load", ()=>notificationDiv.remove());
+        const header = document.querySelector("meta[name=\"_csrf\"]").getAttribute("content")
+        console.log("_csrf: "+ header);
+        const token = document.querySelector("meta[name=\"_csrf_header\"]").getAttribute("content");
+        console.log("_csrf_header: "+ token);
+        request.setRequestHeader(header,token);
+        request.send();
     });
 }
 function handleGameStartSignal() {
     location.href = "/game";
+}
+function handleGameRejected() {
+    console.log("game rejected");
+    alert("game rejected");
+    location.href = "/";
 }
 async function websocketClosedByServer(event) {
     console.log("dude, websocket closed by the server with the following event:");

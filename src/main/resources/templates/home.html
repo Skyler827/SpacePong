@@ -2,6 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <title>Space Pong</title>
     <link rel="stylesheet" th:href="@{/css/style.css}" href="../static/css/style.css">
     <script th:if="${username}" th:src="@{/js/monitor_presence.js}" src="../static/js/monitor_presence.js"></script>

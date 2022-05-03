@@ -50,6 +50,8 @@ public class UserListSender extends Thread {
      */
     private final BlockingQueue<Map<String,Object>> newGameRequests;
 
+    private final ConcurrentMap<String, String> rejectedRequests;
+
     /**
      * <code>waitingPlayerGamesStarting</code> contains the list of players who have requested a game,
      * they've been waiting for a game to start, and their proposal has been accepted. They
@@ -75,6 +77,7 @@ public class UserListSender extends Thread {
         } catch(JSONException e) {throw new RuntimeException("Shouldn't happen");}
         this.playerData = playerDataObject;
         loggingOutPlayers = new LinkedBlockingQueue<>();
+        rejectedRequests = new ConcurrentHashMap<>();
     }
 
     public void run() {
@@ -84,6 +87,7 @@ public class UserListSender extends Thread {
             handleDisconnectingSessions();
             handleLoggingOutPlayers();
             handleNewGameRequests();
+            informUsersRequestsRejected();
             handleWaitingGamesStarting();
             sendListToUsers();
             try {
@@ -148,6 +152,25 @@ public class UserListSender extends Thread {
         }
     }
 
+    private void informUsersRequestsRejected() {
+        JSONObject messageJson = new JSONObject();
+        try {
+            messageJson.put("type", "game_reject");
+            messageJson.put("data", JSONObject.NULL);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+        var message = new TextMessage(messageJson.toString());
+        if (!rejectedRequests.isEmpty()) {
+            synchronized(rejectedRequests) {
+                rejectedRequests.forEach((String rejector, String rejected) -> {
+                    try {
+                        playerSessions.get(rejected).sendMessage(message);
+                    } catch (IOException e) {throw new RuntimeException(e);}
+                });
+            }
+        }
+    }
     private void handleWaitingGamesStarting() {
         if (waitingPlayersGameStarting.isEmpty()) {
             return;

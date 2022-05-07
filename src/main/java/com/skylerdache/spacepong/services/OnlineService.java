@@ -6,11 +6,12 @@ import com.skylerdache.spacepong.game_elements.GameOptions;
 import com.skylerdache.spacepong.threads.UserListSender;
 import lombok.Getter;
 import lombok.Setter;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.data.util.Pair;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
@@ -23,8 +24,8 @@ public class OnlineService {
      * proposals contains a map from a subject player to a map of players who have
      * proposed a game to the subject, to the proposed game options.
      */
-    private final Map<HumanPlayer, Map<HumanPlayer, GameOptions>> proposals;
-    private final Map<HumanPlayer, WebSocketSession> waitingPlayerSessions;
+    private final Map<String, Map<String, GameOptions>> proposals;
+    private final Map<String, WebSocketSession> waitingPlayerSessions;
     private final UserListSender userListSender;
 
     @Getter @Setter
@@ -41,36 +42,33 @@ public class OnlineService {
     public void removeSession(HumanPlayer p, WebSocketSession s) {
         userListSender.getDisconnectingPlayers().add(Pair.of(p.getUsername(), s));
     }
-    public void proposeNewGame(HumanPlayer proposer, HumanPlayer subject, GameOptionsDto options) {
-        GameOptions newGameOptions = new GameOptions(proposer, subject, options);
-        if (proposals.containsKey(subject)) {
-            proposals.get(subject)
-            .put(proposer, newGameOptions);
+    public void proposeNewGame(String proposerName, String proposalReceiverName, GameOptionsDto options) {
+        GameOptions newGameOptions = new GameOptions(proposerName, proposalReceiverName, options);
+        if (proposals.containsKey(proposalReceiverName)) {
+            proposals.get(proposalReceiverName)
+            .put(proposerName, newGameOptions);
         } else {
-            Map<HumanPlayer, GameOptions> newSubjectsProposals = new HashMap<>();
-            newSubjectsProposals.put(proposer, newGameOptions);
-            proposals.put(subject, newSubjectsProposals);
+            Map<String, GameOptions> newSubjectsProposals = new HashMap<>();
+            newSubjectsProposals.put(proposerName, newGameOptions);
+            proposals.put(proposalReceiverName, newSubjectsProposals);
         }
         userListSender.notifyGameRequested(newGameOptions);
-        System.out.println("new game just proposed from "+proposer.getUsername()+" to "+subject.getUsername());
+        System.out.println("new game just proposed from "+proposerName+" to "+proposalReceiverName);
         System.out.println(options);
     }
-    public void registerWaitingConnection(HumanPlayer p, WebSocketSession session) {
-        waitingPlayerSessions.put(p,session);
+    public void registerWaitingConnection(String username, WebSocketSession session) {
+        System.out.println("registerWaitingPlayerConnection() called");
+        waitingPlayerSessions.put(username,session);
     }
-    public void notifyGameAccepted(HumanPlayer proposer, HumanPlayer acceptor) {
+    public void notifyGameAccepted(String proposerName, String acceptorName) {
         try {
-            waitingPlayerSessions.get(proposer).sendMessage(new TextMessage("ok"));
+            waitingPlayerSessions.get(proposerName).sendMessage(new TextMessage("game_start"));
         } catch (IOException e) {
-            // gameService.terminateGame(acceptor);
+            e.printStackTrace();
         }
     }
-    public GameOptions getProposedGameOptions(HumanPlayer proposer, HumanPlayer subject) {
-        try {
-            return proposals.get(subject).get(proposer);
-        } catch (NullPointerException e) {
-            return null;
-        }
+    public GameOptions getProposedGameOptions(String proposerName, String proposalReceiverName) {
+        return proposals.get(proposalReceiverName).get(proposerName);
     }
     public List<String> getPlayers() {
         try {
@@ -83,7 +81,37 @@ public class OnlineService {
         userListSender.getLoggingOutPlayers().add(p.getUsername());
     }
 
-    public void rejectGame(HumanPlayer rejectingPlayer, HumanPlayer requestingPlayer) {
-        proposals.get(rejectingPlayer).remove(requestingPlayer);
+    public void rejectGame(String rejectingPlayerName, String requestingPlayerName) {
+        try {
+            proposals.get(rejectingPlayerName).remove(requestingPlayerName);
+            System.out.println("proposal removed");
+        } catch (NullPointerException e) {
+            System.out.println("Couldn't remove from proposals");
+            System.out.println("rejectingPlayer was: "+rejectingPlayerName+", requestingPlayer was: "+requestingPlayerName);
+            System.out.println("the following proposals were saved:");
+            proposals.forEach((String rejectorName, Map<String, GameOptions> v) -> {
+                v.forEach((String proposerName, GameOptions options)-> {
+                    System.out.println(
+                        "proposer: " +proposerName+
+                        ", rejector: "+rejectorName+
+                        ", options: "+options.toString()
+                    );
+                });
+            });
+        }
+        WebSocketMessage<?> message = new TextMessage("game_reject");
+        try {
+            waitingPlayerSessions.get(requestingPlayerName).sendMessage(message);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NullPointerException e) {
+            System.out.println("waitingPlayerSessions did not contain a websocketSession "+
+                "associated with \""+requestingPlayerName+"\"");
+            System.out.println("waitingPlayerSessions has the following entries: "+waitingPlayerSessions.size());
+            waitingPlayerSessions.forEach((String receiverUsername,WebSocketSession s)->{
+                System.out.println(receiverUsername);
+            });
+            e.printStackTrace();
+        }
     }
 }

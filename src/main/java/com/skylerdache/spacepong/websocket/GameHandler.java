@@ -6,7 +6,9 @@ import com.skylerdache.spacepong.services.GameService;
 import com.skylerdache.spacepong.services.PlayerService;
 import nonapi.io.github.classgraph.json.JSONSerializer;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.stereotype.Service;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -14,6 +16,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.nio.charset.StandardCharsets;
 
+@Service
 public class GameHandler extends TextWebSocketHandler {
     private final GameService gameService;
     private final PlayerService playerService;

@@ -1,5 +1,6 @@
 package com.skylerdache.spacepong.controllers;
 
+import com.skylerdache.spacepong.services.OnlineService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;

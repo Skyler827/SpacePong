@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.security.Principal;
 
 @Controller
-@RequestMapping("/handle_proposal")
 public class AcceptGameController {
     private final PlayerService playerService;
     private final OnlineService onlineService;
@@ -28,20 +27,22 @@ public class AcceptGameController {
         this.onlineService = onlineService;
         this.gameService = gameService;
     }
-    @PostMapping("accept")
+    @PostMapping("handle_proposal/accept")
     public String handleAcceptGame(@RequestParam String username, Principal principal) {
         HumanPlayer challenger = playerService.getHumanPlayerByName(username);
         HumanPlayer acceptingPlayer = playerService.getHumanPlayerByName(principal.getName());
-        GameOptions options = onlineService.getProposedGameOptions(challenger, acceptingPlayer);
+        GameOptions options = onlineService.getProposedGameOptions(
+                challenger.getUsername(), acceptingPlayer.getUsername());
+        onlineService.notifyGameAccepted(challenger.getUsername(), acceptingPlayer.getUsername());
         gameService.startGame(acceptingPlayer, challenger, options);
         return "redirect:/game";
     }
-    @PostMapping("reject")
+    @PostMapping("handle_proposal/reject")
     public ResponseEntity<?> handleRejectGame(@RequestParam("username") String requesterUsername, Principal principal) {
         System.out.println("got here");
         HumanPlayer rejector = playerService.getHumanPlayerByName(principal.getName());
         HumanPlayer requestingPlayer = playerService.getHumanPlayerByName(requesterUsername);
-        onlineService.rejectGame(rejector, requestingPlayer);
+        onlineService.rejectGame(rejector.getUsername(), requestingPlayer.getUsername());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

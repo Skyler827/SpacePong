@@ -276,8 +276,8 @@ public class UserListSender extends Thread {
      */
     public void notifyGameRequested(GameOptions options) {
         Map<String,Object> newGameRequestMap = new HashMap<>();
-        newGameRequestMap.put("proposer",options.getProposer().getUsername());
-        newGameRequestMap.put("receiver",options.getSubject().getUsername());
+        newGameRequestMap.put("proposer",options.getProposerName());
+        newGameRequestMap.put("receiver",options.getProposalReceiverName());
         newGameRequestMap.put("isTimeLimited",options.isTimeLimited());
         newGameRequestMap.put("timeLimit",options.getTimeLimitMinutes());
         newGameRequestMap.put("length",100);

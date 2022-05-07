@@ -5,6 +5,7 @@ import com.skylerdache.spacepong.services.OnlineService;
 import com.skylerdache.spacepong.services.PlayerService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -13,6 +14,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import java.io.IOException;
 import java.security.Principal;
 
+@Service
 public class OnlineHandler extends TextWebSocketHandler {
     private final OnlineService onlineService;
     private final PlayerService playerService;

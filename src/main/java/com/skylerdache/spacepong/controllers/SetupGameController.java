@@ -53,10 +53,10 @@ public class SetupGameController {
     }
     @PostMapping
     public String postSetupGame(@ModelAttribute GameOptionsDto gameSetupDto, RedirectAttributes attributes, Principal principal) {
-        HumanPlayer user = playerService.getHumanPlayerByName(principal.getName());
+        String userName = principal.getName();
         Player opponent = playerService.getPlayerById(gameSetupDto.getOpponentId()).orElseThrow();
         if (opponent instanceof HumanPlayer humanOpponent) {
-            onlineService.proposeNewGame(user, humanOpponent, gameSetupDto);
+            onlineService.proposeNewGame(userName, humanOpponent.getUsername(), gameSetupDto);
             return "redirect:/waiting";
         } else if (opponent instanceof ComputerPlayer computerOpponent) {
             //TODO: start a game immediately

@@ -1,8 +1,13 @@
 // the purpose of this file:
 // is to let the server know that this user is online
-// and update the list of online users on the sidebar
+// update the list of online users on the sidebar
+// and respond to requests for games by creating the notifications on screen
+
 (function(exports) {
     let webSocketSession;
+    const header = document.querySelector("meta[name=\"_csrf_header\"]").getAttribute("content");
+    const token = document.querySelector("meta[name=\"_csrf\"]").getAttribute("content");
+
     function windowOpen() {
         connect();
     }
@@ -102,13 +107,21 @@
         buttonContainer.append(acceptForm);
         const acceptId = "accept-form-"+encodeURIComponent(newGameData.proposer);
         acceptForm.id = acceptId;
-        acceptForm.action = "/handle_proposal/accept?username="+encodeURIComponent(newGameData.proposer);
-        acceptForm.method = "POST";
 
         const acceptButton = document.createElement("button");
         acceptForm.append(acceptButton);
         acceptButton.textContent = "Accept";
         acceptButton.form = acceptId;
+        acceptForm.addEventListener("submit", function(ev) {
+            ev.preventDefault();
+            const request = new XMLHttpRequest();
+            request.open("post","/handle_proposal/accept?username="+encodeURIComponent(newGameData.proposer));
+            request.setRequestHeader(header,token);
+            request.send();
+            request.addEventListener("load", function(e){
+                exports.location = "/game";
+            });
+        });
 
         const rejectForm = document.createElement("form");
         buttonContainer.append(rejectForm);
@@ -120,7 +133,7 @@
         rejectButton.textContent = "Reject";
         rejectButton.form = rejectId;
 
-        rejectForm.addEventListener("click",function(event) {
+        rejectForm.addEventListener("submit",function(event) {
             event.preventDefault();
             const url = "/handle_proposal/reject?username="+encodeURIComponent(newGameData.proposer);
             const request = new XMLHttpRequest();
@@ -130,9 +143,7 @@
             newSpan.innerText = "Rejecting request...";
             buttonContainer.append(newSpan);
             request.addEventListener("load", ()=>notificationDiv.remove());
-            const header = document.querySelector("meta[name=\"_csrf_header\"]").getAttribute("content");
             console.log("_csrf: "+ header);
-            const token = document.querySelector("meta[name=\"_csrf\"]").getAttribute("content");
             console.log("_csrf_header: "+ token);
             request.setRequestHeader(header,token);
             request.send();

@@ -27,8 +27,9 @@ public class AcceptGameController {
         this.onlineService = onlineService;
         this.gameService = gameService;
     }
-    @PostMapping("handle_proposal/accept")
+    @PostMapping("/handle_proposal/accept")
     public String handleAcceptGame(@RequestParam String username, Principal principal) {
+        System.out.println("running AcceptGameController.handleAcceptGame()...");
         HumanPlayer challenger = playerService.getHumanPlayerByName(username);
         HumanPlayer acceptingPlayer = playerService.getHumanPlayerByName(principal.getName());
         GameOptions options = onlineService.getProposedGameOptions(
@@ -37,7 +38,7 @@ public class AcceptGameController {
         gameService.startGame(acceptingPlayer, challenger, options);
         return "redirect:/game";
     }
-    @PostMapping("handle_proposal/reject")
+    @PostMapping("/handle_proposal/reject")
     public ResponseEntity<?> handleRejectGame(@RequestParam("username") String requesterUsername, Principal principal) {
         System.out.println("got here");
         HumanPlayer rejector = playerService.getHumanPlayerByName(principal.getName());

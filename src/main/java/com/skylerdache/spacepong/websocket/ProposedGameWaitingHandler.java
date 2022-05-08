@@ -23,15 +23,10 @@ public class ProposedGameWaitingHandler extends TextWebSocketHandler {
     public void afterConnectionEstablished(@NotNull WebSocketSession session) {
         @NotNull String username = Objects.requireNonNull(session.getPrincipal()).getName();
         onlineService.registerWaitingConnection(username, session);
-        try {
-            session.sendMessage(new TextMessage("Hello??? Are you getting this????"));
-        } catch (IOException e) {e.printStackTrace();}
     }
 
     @Override
     public void handleTextMessage(@NotNull WebSocketSession session, @NotNull TextMessage message) {
-
-
     }
     @Override
     public void afterConnectionClosed(@NotNull WebSocketSession session, @NotNull CloseStatus closeStatus) {

@@ -12,7 +12,8 @@
     }
     function sessionOpen() {}
     function handleData(message) {
-        switch (message) {
+        const parsedMessage = JSON.parse(message.data);
+        switch (parsedMessage.type) {
             case "game_start":
                 handleGameStart();
                 break;

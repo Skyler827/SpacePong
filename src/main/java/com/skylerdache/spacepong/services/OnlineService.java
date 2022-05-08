@@ -61,8 +61,17 @@ public class OnlineService {
         waitingPlayerSessions.put(username,session);
     }
     public void notifyGameAccepted(String proposerName, String acceptorName) {
+        JSONObject messageJson = new JSONObject();
         try {
-            waitingPlayerSessions.get(proposerName).sendMessage(new TextMessage("game_start"));
+            messageJson.put("type", "game_start");
+            messageJson.put("opponent", acceptorName);
+        } catch (JSONException e) {
+            // shouldn't ever happen
+            throw new RuntimeException(e);
+        }
+        try {
+            var message = new TextMessage(messageJson.toString());
+            waitingPlayerSessions.get(proposerName).sendMessage(message);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -99,7 +108,13 @@ public class OnlineService {
                 });
             });
         }
-        WebSocketMessage<?> message = new TextMessage("game_reject");
+        JSONObject messageJson = new JSONObject();
+        try {
+            messageJson.put("type", "game_reject");
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+        var message = new TextMessage(messageJson.toString());
         try {
             waitingPlayerSessions.get(requestingPlayerName).sendMessage(message);
         } catch (IOException e) {

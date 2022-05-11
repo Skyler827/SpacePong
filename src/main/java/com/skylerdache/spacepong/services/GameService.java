@@ -26,16 +26,15 @@ import java.util.stream.StreamSupport;
 public class GameService {
     private final GameRepository gameRepository;
     private final HashMap<Long, GameState> games;
-    private final ScheduledExecutorService gameExecutor;
     private static final int POOL_SIZE = 1;
     private static final double TICK_TIME_SECONDS = 0.1;
 
     public GameService(GameRepository gameRepository) {
         this.gameRepository = gameRepository;
         games = new HashMap<>();
-        gameExecutor = Executors.newScheduledThreadPool(POOL_SIZE);
-        GameRunner ticker = new GameRunner(this, games, TICK_TIME_SECONDS);
-        gameExecutor.schedule(ticker, 100, TimeUnit.MILLISECONDS);
+        GameRunner ticker = new GameRunner(this);
+        Thread t = new Thread(ticker);
+        t.start();
     }
     public void startGame(@NotNull Player p1, @NotNull Player p2, GameOptions options) {
         GameEntity newGame = new GameEntity();
@@ -44,7 +43,7 @@ public class GameService {
         newGame.setOptions(options);
         GameEntity savedGame = gameRepository.save(newGame);
         long gameId = savedGame.getId();
-        GameState game = new GameState(options, p1, p2, savedGame);
+        GameState game = new GameState(options, savedGame);
         games.put(gameId,game);
     }
     public GameStateDto getGameState(long gameId) {

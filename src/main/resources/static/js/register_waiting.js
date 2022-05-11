@@ -31,13 +31,11 @@
     function handleGameRejected() {
         const msg = "game rejected, redirecting back to home...";
         console.log(msg);
-        alert(msg);
         exports.location.href = "/";
     }
     function handleGameStart() {
         const msg = "game accepted, starting...";
         console.log(msg);
-        alert(msg);
         exports.location.href = "/game";
     }
     exports.addEventListener("load", connect);

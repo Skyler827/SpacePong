@@ -37,8 +37,6 @@ public class UserListSender extends Thread {
     @Getter
     private final BlockingQueue<Pair<String, WebSocketSession>> disconnectingPlayers;
 
-    @Getter
-    private final BlockingQueue<String> loggingOutPlayers;
     /**
      * <code>newGameRequests</code> contains a list of maps, with each map representing a request by one user to
      * start a game with another user. Each map contains the following attributes:
@@ -49,6 +47,8 @@ public class UserListSender extends Thread {
      * "length": a number >50, <150
      */
     private final BlockingQueue<Map<String,Object>> newGameRequests;
+    @Getter
+    private final BlockingQueue<String> loggingOutPlayers;
 
     private final ConcurrentMap<String, String> rejectedRequests;
 

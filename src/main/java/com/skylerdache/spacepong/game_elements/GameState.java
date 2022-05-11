@@ -1,9 +1,12 @@
 package com.skylerdache.spacepong.game_elements;
 
 import com.skylerdache.spacepong.dto.GameStateDto;
+import com.skylerdache.spacepong.dto.PlayerControlMessage;
 import com.skylerdache.spacepong.entities.GameEntity;
 import com.skylerdache.spacepong.entities.Player;
+import com.skylerdache.spacepong.enums.LeftRightArrowState;
 import com.skylerdache.spacepong.enums.PlayerPosition;
+import com.skylerdache.spacepong.enums.UpDownArrowState;
 import com.skylerdache.spacepong.exceptions.GameOverException;
 import com.skylerdache.spacepong.exceptions.PlayerScoreException;
 import lombok.Getter;
@@ -22,22 +25,22 @@ public class GameState {
     private int p1Score = 0;
     private int p2Score = 0;
     private final int scoreThreshHold;
-    private final Player player1;
-    private final Player player2;
+    private PlayerControlState p1Control;
+    private PlayerControlState p2Control;
     @Getter
     private final GameEntity gameEntity;
-    public GameState(GameOptions options, Player player1, Player player2, GameEntity gameEntity) {
+    public GameState(GameOptions options, GameEntity gameEntity) {
         scoreThreshHold = options.getScoreThreshold();
         ball = new Ball(1, new SpaceBounds());
         p1Paddle = new Paddle();
         p2Paddle = new Paddle();
-        this.player1 = player1;
-        this.player2 = player2;
+        p1Control = new PlayerControlState(LeftRightArrowState.NONE, UpDownArrowState.NONE);
+        p2Control = new PlayerControlState(LeftRightArrowState.NONE, UpDownArrowState.NONE);
         this.gameEntity = gameEntity;
     }
     public void tick(double dt) throws GameOverException{
-        p1Paddle.tick(dt, player1.getControlState());
-        p2Paddle.tick(dt, player2.getControlState());
+        p1Paddle.tick(dt, p1Control);
+        p2Paddle.tick(dt, p2Control);
         try {
             ball.tick(dt, p1Paddle, p2Paddle);
         } catch (PlayerScoreException e) {
@@ -52,10 +55,8 @@ public class GameState {
                 }
             }
             if (p1Score >= scoreThreshHold) {
-                gameEntity.setWinner(player1);
                 throw new GameOverException(PlayerPosition.P1);
             } else if (p2Score >= scoreThreshHold) {
-                gameEntity.setWinner(player2);
                 throw new GameOverException(PlayerPosition.P2);
             }
         }
@@ -78,5 +79,16 @@ public class GameState {
         gs.setP1PaddleVz(p1Paddle.getVz());
 
         return gs;
+    }
+
+    public void update(PlayerControlMessage m) {
+        switch (m.getPlayerPosition()) {
+            case P1 -> {
+                p1Control = new PlayerControlState(m.getLrState(),m.getUdState());
+            }
+            case P2 -> {
+                p2Control = new PlayerControlState(m.getLrState(),m.getUdState());
+            }
+        }
     }
 }

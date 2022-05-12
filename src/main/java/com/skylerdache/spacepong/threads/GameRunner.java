@@ -1,67 +1,93 @@
 package com.skylerdache.spacepong.threads;
 
 import com.skylerdache.spacepong.dto.PlayerControlMessage;
+import com.skylerdache.spacepong.entities.GameEntity;
 import com.skylerdache.spacepong.exceptions.GameOverException;
+import com.skylerdache.spacepong.game_elements.GameOptions;
 import com.skylerdache.spacepong.game_elements.GameState;
 import com.skylerdache.spacepong.services.GameService;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Map;
+import java.time.temporal.ChronoUnit;
 import java.util.concurrent.*;
 
-public class GameRunner implements Runnable {
+public class GameRunner {
     private final ConcurrentMap<Long, GameState> games;
     private final GameService gameService;
-    private final double tickTimeSeconds = 0.1;
     private final ConcurrentMap<Long, BlockingQueue<PlayerControlMessage>> controlMessages;
+    private static final int TICK_DELAY_MILLIS = 50;
     public GameRunner(GameService gameService) {
         this.games = new ConcurrentHashMap<>();
         this.gameService = gameService;
         controlMessages = new ConcurrentHashMap<>();
     }
-    @Override
-    public void run() {
-        //noinspection InfiniteLoopStatement
-        while (true) {
-            games.forEach((Long id, GameState game) -> {
-                double dt = 0.01;
-                var x = Instant.now();
-                var y = Instant.now();
-                Duration.between(x,y);
-                controlMessages.get(id).forEach(m->{
-                    tickGame(game, dt);
-                    game.update(m);
-                });
-                tickGame(game, dt);
-            });
+    @Scheduled(fixedRate=TICK_DELAY_MILLIS, timeUnit=TimeUnit.MILLISECONDS)
+    public void tickAllGames() {
+        games.forEach(this::tickOneGame);
+    }
+    private void tickOneGame(long id, GameState game) {
+        if (game.isPaused()) return;
+        Instant currentTickStart = Instant.now();
+        Instant previousTickStart = currentTickStart.minus(TICK_DELAY_MILLIS, ChronoUnit.MILLIS);
+        BlockingQueue<PlayerControlMessage> messages = controlMessages.get(id);
+        PlayerControlMessage prevMessage = null;
+        PlayerControlMessage currentMessage;
+        // simulate the game before and between each control message:
+        while (!messages.isEmpty()) {
             try {
-                //TODO: replace this with an accurate wait calculation
-                wait((int) (tickTimeSeconds / 1000));
+                currentMessage = messages.take();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
+            Duration dt;
+            if (prevMessage == null) {
+                dt = Duration.between(previousTickStart, currentMessage.time());
+            } else {
+                dt = Duration.between(prevMessage.time(), currentMessage.time());
+            }
+            double timeMillis = dt.get(ChronoUnit.MILLIS);
+            tickGame(game, timeMillis);
+            game.update(currentMessage);
+            prevMessage = currentMessage;
+        }
+        // simulate game after all control messages have arrived:
+        if (prevMessage == null) {
+            tickGame(game, TICK_DELAY_MILLIS);
+        } else {
+            Duration dt = Duration.between(prevMessage.time(), currentTickStart);
+            double timeMillis = dt.get(ChronoUnit.MILLIS);
+            tickGame(game,timeMillis);
         }
     }
     public void updatePlayerControl(PlayerControlMessage m) {
         synchronized(controlMessages) {
-            if (controlMessages.containsKey(m.getGameId())) {
-                controlMessages.get(m.getGameId()).add(m);
+            if (controlMessages.containsKey(m.gameId())) {
+                controlMessages.get(m.gameId()).add(m);
             } else {
                 BlockingQueue<PlayerControlMessage> q = new LinkedBlockingQueue<>();
                 q.add(m);
-                controlMessages.put(m.getGameId(),q);
+                controlMessages.put(m.gameId(),q);
             }
         }
     }
-    public void newGame(long id) {
-//        games.put(id,)
+    public void newGame(GameEntity e, GameOptions options) {
+        games.put(e.getId(),new GameState(options, e));
     }
     private void tickGame(GameState game, double dt) {
         try {
             game.tick(dt);
         } catch (GameOverException e) {
+            game.getGameEntity().setP1Score(e.p1Score);
+            game.getGameEntity().setP2Score(e.p2Score);
             gameService.notifyGameOver(game.getGameEntity(), e.winner);
         }
+    }
+    public void pauseGame(long id) {
+        games.get(id).pause();
+    }
+    public void unpauseGame(long id) {
+        games.get(id).unpause();
     }
 }

@@ -8,33 +8,30 @@ import com.skylerdache.spacepong.entities.Player;
 import com.skylerdache.spacepong.enums.PlayerPosition;
 import com.skylerdache.spacepong.exceptions.NoSuchGameException;
 import com.skylerdache.spacepong.game_elements.GameOptions;
-import com.skylerdache.spacepong.game_elements.GameState;
 import com.skylerdache.spacepong.repositories.GameRepository;
 import com.skylerdache.spacepong.threads.GameRunner;
+import com.skylerdache.spacepong.threads.GameStateSender;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import org.springframework.web.socket.WebSocketSession;
 
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.*;
+import java.util.concurrent.Future;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 @Service
 public class GameService {
     private final GameRepository gameRepository;
-    private final HashMap<Long, GameState> games;
-    private static final int POOL_SIZE = 1;
-    private static final double TICK_TIME_SECONDS = 0.1;
+    private final GameRunner gameRunner;
+    private final GameStateSender gameStateSender;
 
-    public GameService(GameRepository gameRepository) {
+    public GameService(GameRepository gameRepository, GameStateSender gameStateSender) {
         this.gameRepository = gameRepository;
-        games = new HashMap<>();
-        GameRunner ticker = new GameRunner(this);
-        Thread t = new Thread(ticker);
-        t.start();
+        this.gameRunner = new GameRunner(this);
+        this.gameStateSender = gameStateSender;
     }
     public void startGame(@NotNull Player p1, @NotNull Player p2, GameOptions options) {
         GameEntity newGame = new GameEntity();
@@ -42,16 +39,20 @@ public class GameService {
         newGame.setPlayer2(p2);
         newGame.setOptions(options);
         GameEntity savedGame = gameRepository.save(newGame);
-        long gameId = savedGame.getId();
-        GameState game = new GameState(options, savedGame);
-        games.put(gameId,game);
+        gameRunner.newGame(savedGame, options);
     }
-    public GameStateDto getGameState(long gameId) {
-        return games.get(gameId).getGameState();
+    public Future<GameStateDto> getGameState(long gameId) {
+        return null;
     }
 
     public List<GameEntity> getAll() {
         return StreamSupport.stream(gameRepository.findAll().spliterator(), false).toList();
+    }
+    public void userConnected(HumanPlayer p, WebSocketSession s) {
+        try {
+            GameEntity e = getOngoingGameByPlayer(p);
+
+        } catch (NoSuchGameException e) {}
     }
 
     public GameEntity getOngoingGameByPlayer(Player p) throws NoSuchGameException {
@@ -73,10 +74,10 @@ public class GameService {
 
 
     public void notifyGameOver(GameEntity g, PlayerPosition winner) {
-        games.remove(g.getId());
         gameRepository.save(g);
     }
 
     public void sendControlMessage(HumanPlayer p, PlayerControlMessage msg) {
+        gameRunner.updatePlayerControl(msg);
     }
 }

@@ -17,7 +17,6 @@
     let upDownArrowState = "none";
     let vx = 0;
     let vz = 0;
-    let websocketConnection;
     let socket;
 
     function setCameraP1() {
@@ -105,90 +104,92 @@
     }
 
     function setKeyHandler() {
-        window.addEventListener("keydown", (ev) => {
-            switch (ev.code) {
-                case "ArrowLeft":
-                case "KeyA":
-                    leftRightArrowState = {
-                        "left": "left",
-                        "right": "both",
-                        "both": "both",
-                        "none": "left"
-                    }[leftRightArrowState];
-                    break;
-                case "ArrowRight":
-                case "KeyD":
-                    leftRightArrowState = {
-                        "left": "both",
-                        "right": "right",
-                        "both": "both",
-                        "none": "right"
-                    }[leftRightArrowState];
-                    break;
-                case "ArrowUp":
-                case "KeyW":
-                    upDownArrowState = {
-                        "up": "up",
-                        "down": "both",
-                        "both": "both",
-                        "none": "up"
-                    }[upDownArrowState];
-                    break;
-                case "ArrowDown":
-                case "KeyS":
-                    upDownArrowState = {
-                        "up": "both",
-                        "down": "down",
-                        "both": "both",
-                        "none": "down"
-                    }[upDownArrowState];
-                    break;
-                default:
-                    break; // no action required
-            }
-        });
-        window.addEventListener("keyup", (ev) => {
-            switch (ev.code) {
-                case "ArrowLeft":
-                case "KeyA":
-                    leftRightArrowState = {
-                        "left": "none",
-                        "right": "right",
-                        "both": "right",
-                        "none": "none"
-                    }[leftRightArrowState];
-                    break;
-                case "ArrowRight":
-                case "KeyD":
-                    leftRightArrowState = {
-                        "left": "left",
-                        "right": "none",
-                        "both": "left",
-                        "none": "none"
-                    }[leftRightArrowState];
-                    break;
-                case "ArrowUp":
-                case "KeyW":
-                    upDownArrowState = {
-                        "up": "none",
-                        "down": "down",
-                        "both": "down",
-                        "none": "none"
-                    }[upDownArrowState];
-                    break;
-                case "ArrowDown":
-                case "KeyS":
-                    upDownArrowState = {
-                        "up": "up",
-                        "down": "none",
-                        "both": "up",
-                        "none": "none"
-                    }[upDownArrowState];
-                    break;
-                default:
-                    break; //no action required
-            }
-        });
+        window.addEventListener("keydown", keyDownHandler);
+        window.addEventListener("keyup", keyUpHandler);
+    }
+    function keyDownHandler(keyboardEvent) {
+        switch (keyboardEvent.code) {
+            case "ArrowLeft":
+            case "KeyA":
+                leftRightArrowState = {
+                    "left": "left",
+                    "right": "both",
+                    "both": "both",
+                    "none": "left"
+                }[leftRightArrowState];
+                break;
+            case "ArrowRight":
+            case "KeyD":
+                leftRightArrowState = {
+                    "left": "both",
+                    "right": "right",
+                    "both": "both",
+                    "none": "right"
+                }[leftRightArrowState];
+                break;
+            case "ArrowUp":
+            case "KeyW":
+                upDownArrowState = {
+                    "up": "up",
+                    "down": "both",
+                    "both": "both",
+                    "none": "up"
+                }[upDownArrowState];
+                break;
+            case "ArrowDown":
+            case "KeyS":
+                upDownArrowState = {
+                    "up": "both",
+                    "down": "down",
+                    "both": "both",
+                    "none": "down"
+                }[upDownArrowState];
+                break;
+            default:
+                break; // no action required
+        }
+    }
+    function keyUpHandler(keyboardEvent) {
+        switch (keyboardEvent.code) {
+            case "ArrowLeft":
+            case "KeyA":
+                leftRightArrowState = {
+                    "left": "none",
+                    "right": "right",
+                    "both": "right",
+                    "none": "none"
+                }[leftRightArrowState];
+                break;
+            case "ArrowRight":
+            case "KeyD":
+                leftRightArrowState = {
+                    "left": "left",
+                    "right": "none",
+                    "both": "left",
+                    "none": "none"
+                }[leftRightArrowState];
+                break;
+            case "ArrowUp":
+            case "KeyW":
+                upDownArrowState = {
+                    "up": "none",
+                    "down": "down",
+                    "both": "down",
+                    "none": "none"
+                }[upDownArrowState];
+                break;
+            case "ArrowDown":
+            case "KeyS":
+                upDownArrowState = {
+                    "up": "up",
+                    "down": "none",
+                    "both": "up",
+                    "none": "none"
+                }[upDownArrowState];
+                break;
+            default:
+                break; //no action required
+        }
     }
 
     function setupWebSockets() {
@@ -199,10 +200,12 @@
             console.log(event);
             socket.send("hello server!");
         });
-        socket.addEventListener("message", async function (event) {
-            console.log("message from server:");
-            console.log(event.data);
-        });
+        socket.addEventListener("message", webSocketMessage);
+
+    }
+    function webSocketMessage(event) {
+        let sampleMessage = {"paused":false,"p1Score":0,"p2Score":0,"p1PaddleX":0.0,"p1PaddleY":0.0,"p1PaddleZ":0.0,"p1PaddleVx":0.0,"p1PaddleVy":0.0,"p1PaddleVz":0.0,"p2PaddleX":0.0,"p2PaddleY":0.0,"p2PaddleZ":0.0,"p2PaddleVx":0.0,"p2PaddleVy":0.0,"p2PaddleVz":0.0,"ballX":0.0,"ballY":0.0,"ballZ":0.0,"ballVx":0.0,"ballVy":0.0,"ballVz":0.0}
+        console.log(event);
 
     }
 
@@ -226,7 +229,7 @@
         setScene();
         setKeyHandler();
         setupWebSockets();
-        // animate(0);
+        animate(0);
     }
 
     function animate(timestamp) {

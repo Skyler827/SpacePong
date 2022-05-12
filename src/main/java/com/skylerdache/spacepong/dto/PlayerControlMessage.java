@@ -4,15 +4,16 @@ import com.skylerdache.spacepong.enums.LeftRightArrowState;
 import com.skylerdache.spacepong.enums.PlayerPosition;
 import com.skylerdache.spacepong.enums.UpDownArrowState;
 import lombok.Data;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 
-@Data
-public class PlayerControlMessage {
-    private PlayerPosition playerPosition;
-    private LeftRightArrowState lrState;
-    private UpDownArrowState udState;
-    private long gameId;
-    private String player;
-    private Instant time;
-}
+public record PlayerControlMessage (
+    PlayerPosition playerPosition,
+    LeftRightArrowState lrState,
+    UpDownArrowState udState,
+    long gameId,
+    String player,
+    Instant time
+) {}
+

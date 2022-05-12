@@ -20,10 +20,10 @@ public class GameRestController {
     List<GameEntity> all() {
         return gameService.getAll();
     }
-    @GetMapping("/restgames/{id}")
-    GameStateDto gameStatus(@PathVariable long id) {
-        System.out.println("/restgames/{id} is:");
-        System.out.println(id);
-        return gameService.getGameState(id);
-    }
+//    @GetMapping("/restgames/{id}")
+//    GameStateDto gameStatus(@PathVariable long id) {
+//        System.out.println("/restgames/{id} is:");
+//        System.out.println(id);
+//        return gameService.getGameState(id);
+//    }
 }

@@ -56,6 +56,11 @@ public class Ball {
             z += dt * vz;
         }
     }
+    public void resetPosition() {
+        this.x = 0;
+        this.y = 0;
+        this.z = 0;
+    }
 
     public String getPosition() {
         return String.format("x: %1f, y: %1f, z: %1f",x, y, z);

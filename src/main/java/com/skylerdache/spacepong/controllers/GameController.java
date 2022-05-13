@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
+import java.util.NoSuchElementException;
 
 @Controller
 public class GameController {
@@ -24,10 +25,10 @@ public class GameController {
     public String getGame(Model model, RedirectAttributes attributes, Principal principal) {
         final GameEntity game = (GameEntity) attributes.getFlashAttributes().get("game");
         if (game == null) {
+            Player p = playerService.getPlayerByName(principal.getName());
             try {
-                Player p = playerService.getPlayerByName(principal.getName());
                 model.addAttribute("gameId", gameService.getOngoingGameByPlayer(p).getId());
-            } catch (NoSuchGameException e) {
+            } catch (NoSuchElementException e) {
                 String message = "You are not in any current game";
                 System.out.println(message);
                 attributes.addFlashAttribute("warning", message);

@@ -15,10 +15,9 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -27,11 +26,13 @@ public class GameService {
     private final GameRepository gameRepository;
     private final GameRunner gameRunner;
     private final GameStateSender gameStateSender;
+    private final Map<Long,Long> gameIdByUserId;
 
     public GameService(GameRepository gameRepository, GameStateSender gameStateSender) {
         this.gameRepository = gameRepository;
         this.gameRunner = new GameRunner(this);
         this.gameStateSender = gameStateSender;
+        this.gameIdByUserId = new HashMap<>();
     }
     public void startGame(@NotNull Player p1, @NotNull Player p2, GameOptions options) {
         GameEntity newGame = new GameEntity();
@@ -39,6 +40,8 @@ public class GameService {
         newGame.setPlayer2(p2);
         newGame.setOptions(options);
         GameEntity savedGame = gameRepository.save(newGame);
+        gameIdByUserId.put(p1.getId(), savedGame.getId());
+        gameIdByUserId.put(p2.getId(), savedGame.getId());
         gameRunner.newGame(savedGame, options);
     }
     public Future<GameStateDto> getGameState(long gameId) {
@@ -52,18 +55,12 @@ public class GameService {
         try {
             GameEntity e = getOngoingGameByPlayer(p);
 
-        } catch (NoSuchGameException e) {}
+        } catch (NoSuchElementException e) {}
     }
 
-    public GameEntity getOngoingGameByPlayer(Player p) throws NoSuchGameException {
-        Optional<GameEntity> g = Stream.concat(
-            gameRepository.findGamesByPlayer1(p).stream(),
-            gameRepository.findGamesByPlayer2(p).stream()
-        )
-        .filter((GameEntity gg)->gg.getEndTime()==null)
-        .max(Comparator.comparing(GameEntity::getStartTime));
-        if (g.isPresent()) return g.get();
-        else throw new NoSuchGameException();
+    public GameEntity getOngoingGameByPlayer(Player p) throws NoSuchElementException {
+        long gameId = gameIdByUserId.get(p.getId());
+        return gameRepository.findById(gameId).orElseThrow();
     }
     public List<GameEntity> getGamesByPlayer(Player p) {
         return Stream.concat(
@@ -79,5 +76,8 @@ public class GameService {
 
     public void sendControlMessage(HumanPlayer p, PlayerControlMessage msg) {
         gameRunner.updatePlayerControl(msg);
+    }
+
+    public void userDisconnected(HumanPlayer p) {
     }
 }

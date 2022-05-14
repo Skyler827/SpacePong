@@ -2,6 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <title>Game</title>
     <link rel="stylesheet" th:href="@{/css/style.css}" href="../static/css/style.css">
     <script th:src="@{/js/three.js}" src="../static/js/three.js"></script>

@@ -2,6 +2,7 @@ package com.skylerdache.spacepong.threads;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.skylerdache.spacepong.enums.PlayerPosition;
 import com.skylerdache.spacepong.game_elements.GameState;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -60,32 +61,34 @@ public class GameStateSender {
         }
     }
 
-    @Scheduled(fixedRate = 50, timeUnit= TimeUnit.MILLISECONDS)
+    @Scheduled(fixedRate = 5, timeUnit= TimeUnit.SECONDS)
     public void sendGameState() {
         singlePlayerGameStates.forEach((id, gs) -> {
-            sendMessages(id,createGameStateMessage(gs), singlePlayerWebSockets);
+            sendMessages(id,createGameStateMessage(gs), singlePlayerWebSockets, PlayerPosition.P1);
         });
         twoPlayerGameStates.forEach((id, gs) ->{
             TextMessage msg = createGameStateMessage(gs);
-            sendMessages(id, msg, p1WebSockets);
-            sendMessages(id, msg, p2WebSockets);
+            sendMessages(id, msg, p1WebSockets, PlayerPosition.P1);
+            sendMessages(id, msg, p2WebSockets, PlayerPosition.P2);
         });
     }
     @Contract("_ -> new")
     private @NotNull TextMessage createGameStateMessage(@NotNull GameState gs) {
         ObjectMapper m = new ObjectMapper();
-        WebSocketMessage<String> msg;
         try {
             return new TextMessage(m.writeValueAsString(gs.getDto()));
         } catch (JsonProcessingException e) {
             throw new RuntimeException("shouldn't ever happen");
         }
     }
-    private void sendMessages(long id, TextMessage msg, @NotNull Map<Long, WebSocketSession> sockets) {
+    private void sendMessages(long id, TextMessage msg, @NotNull Map<Long, WebSocketSession> sockets, PlayerPosition p) {
         try {
             sockets.get(id).sendMessage(msg);
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (NullPointerException e) {
+            System.out.println("unable to send the following data to "+p.toString());
+            System.out.println(msg.getPayload());
         }
     }
 }

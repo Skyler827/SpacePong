@@ -1,13 +1,12 @@
 package com.skylerdache.spacepong.services;
 
-import com.skylerdache.spacepong.dto.GameStateDto;
 import com.skylerdache.spacepong.dto.PlayerControlMessage;
+import com.skylerdache.spacepong.entities.ComputerPlayer;
 import com.skylerdache.spacepong.entities.GameEntity;
 import com.skylerdache.spacepong.entities.HumanPlayer;
 import com.skylerdache.spacepong.entities.Player;
-import com.skylerdache.spacepong.enums.PlayerPosition;
-import com.skylerdache.spacepong.exceptions.NoSuchGameException;
 import com.skylerdache.spacepong.game_elements.GameOptions;
+import com.skylerdache.spacepong.game_elements.GameState;
 import com.skylerdache.spacepong.repositories.GameRepository;
 import com.skylerdache.spacepong.threads.GameRunner;
 import com.skylerdache.spacepong.threads.GameStateSender;
@@ -16,9 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.*;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 @Service
@@ -42,10 +38,14 @@ public class GameService {
         GameEntity savedGame = gameRepository.save(newGame);
         gameIdByUserId.put(p1.getId(), savedGame.getId());
         gameIdByUserId.put(p2.getId(), savedGame.getId());
-        gameRunner.newGame(savedGame, options);
-    }
-    public Future<GameStateDto> getGameState(long gameId) {
-        return null;
+        GameState gs = gameRunner.newGame(savedGame, options);
+        if (p2 instanceof HumanPlayer) {
+            gameStateSender.addTwoPlayerGame(savedGame.getId(), gs);
+        }
+        if (p2 instanceof ComputerPlayer) {
+            gameStateSender.addSinglePlayerGame(savedGame.getId(), gs);
+            // initialize computer player and start game here
+        }
     }
 
     public List<GameEntity> getAll() {
@@ -53,25 +53,25 @@ public class GameService {
     }
     public void userConnected(HumanPlayer p, WebSocketSession s) {
         try {
-            GameEntity e = getOngoingGameByPlayer(p);
-
-        } catch (NoSuchElementException e) {}
+            long gameId = gameIdByUserId.get(p.getId());
+            gameStateSender.playerConnect(gameId, s);
+        } catch (NoSuchElementException e) {
+            e.printStackTrace();
+        }
     }
 
     public GameEntity getOngoingGameByPlayer(Player p) throws NoSuchElementException {
-        long gameId = gameIdByUserId.get(p.getId());
+        Long gameId = gameIdByUserId.get(p.getId());
+        if (gameId == null) {
+            throw new NoSuchElementException("no game reference for this user");
+        }
         return gameRepository.findById(gameId).orElseThrow();
     }
-    public List<GameEntity> getGamesByPlayer(Player p) {
-        return Stream.concat(
-            gameRepository.findGamesByPlayer1(p).stream(),
-            gameRepository.findGamesByPlayer2(p).stream()
-        ).toList();
-    }
 
-
-    public void notifyGameOver(GameEntity g, PlayerPosition winner) {
+    public void notifyGameOver(GameEntity g) {
         gameRepository.save(g);
+        gameIdByUserId.remove(g.getPlayer1().getId());
+        gameIdByUserId.remove(g.getPlayer2().getId());
     }
 
     public void sendControlMessage(HumanPlayer p, PlayerControlMessage msg) {
@@ -79,5 +79,13 @@ public class GameService {
     }
 
     public void userDisconnected(HumanPlayer p) {
+
+    }
+
+    public void pause(HumanPlayer p) {
+        gameRunner.pauseGame(gameIdByUserId.get(p.getId()));
+    }
+    public void unpause(HumanPlayer p) {
+        gameRunner.unpauseGame(gameIdByUserId.get(p.getId()));
     }
 }

@@ -72,16 +72,23 @@ public class GameRunner {
             }
         }
     }
-    public void newGame(GameEntity e, GameOptions options) {
-        games.put(e.getId(),new GameState(options, e));
+    public GameState newGame(GameEntity e, GameOptions options) {
+        GameState gs = new GameState(options, e);
+        games.put(e.getId(),gs);
+        return gs;
     }
     private void tickGame(GameState game, double dt) {
         try {
             game.tick(dt);
         } catch (GameOverException e) {
-            game.getGameEntity().setP1Score(e.p1Score);
-            game.getGameEntity().setP2Score(e.p2Score);
-            gameService.notifyGameOver(game.getGameEntity(), e.winner);
+            GameEntity ge = game.getGameEntity();
+            ge.setP1Score(e.p1Score);
+            ge.setP2Score(e.p2Score);
+            switch (e.winner) {
+                case P1: {ge.setWinner(ge.getPlayer1());}
+                case P2: {ge.setWinner(ge.getPlayer2());}
+            }
+            gameService.notifyGameOver(ge);
         }
     }
     public void pauseGame(long id) {

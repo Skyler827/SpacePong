@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skylerdache.spacepong.dto.GameStateDto;
+import com.skylerdache.spacepong.dto.PlayerControlMessage;
 import com.skylerdache.spacepong.dto.PlayerDto;
 import com.skylerdache.spacepong.services.PlayerService;
 import org.json.JSONArray;
@@ -76,9 +77,13 @@ public class SpacePongApplication {
             InputStream gsFileStream = new ByteArrayInputStream(gsJsonString.getBytes());
             GameStateDto gsdto2 = m.readValue(gsFileStream, GameStateDto.class);
             System.out.println(gsdto2.ballVz());
+            JSONObject jsonObj = new JSONObject();
+
         } catch (IOException e) {
             System.out.println("IO Exception");
         }
+        PlayerControlMessage pcm = new PlayerControlMessage();
+        System.out.println(pcm.getJson());
     }
 
     @EventListener(ApplicationReadyEvent.class)

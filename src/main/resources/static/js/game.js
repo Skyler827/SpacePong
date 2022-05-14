@@ -13,8 +13,10 @@
     let p2Paddle;
     let leftWallGridHelper;
     let rightWallGridHelper;
-    let leftRightArrowState = "none";
-    let upDownArrowState = "none";
+    let leftRightArrowState = "NONE";
+    let upDownArrowState = "NONE";
+    let playerPosition = "P1";
+    let gameId = 0;
     let vx = 0;
     let vz = 0;
     let socket;
@@ -112,101 +114,113 @@
             case "ArrowLeft":
             case "KeyA":
                 leftRightArrowState = {
-                    "left": "left",
-                    "right": "both",
-                    "both": "both",
-                    "none": "left"
+                    "LEFT": "LEFT",
+                    "RIGHT": "BOTH",
+                    "BOTH": "BOTH",
+                    "NONE": "LEFT"
                 }[leftRightArrowState];
                 break;
             case "ArrowRight":
             case "KeyD":
                 leftRightArrowState = {
-                    "left": "both",
-                    "right": "right",
-                    "both": "both",
-                    "none": "right"
+                    "LEFT": "BOTH",
+                    "RIGHT": "RIGHT",
+                    "BOTH": "BOTH",
+                    "NONE": "RIGHT"
                 }[leftRightArrowState];
                 break;
             case "ArrowUp":
             case "KeyW":
                 upDownArrowState = {
-                    "up": "up",
-                    "down": "both",
-                    "both": "both",
-                    "none": "up"
+                    "UP": "UP",
+                    "DOWN": "BOTH",
+                    "BOTH": "BOTH",
+                    "NONE": "UP"
                 }[upDownArrowState];
                 break;
             case "ArrowDown":
             case "KeyS":
                 upDownArrowState = {
-                    "up": "both",
-                    "down": "down",
-                    "both": "both",
-                    "none": "down"
+                    "UP": "BOTH",
+                    "DOWN": "DOWN",
+                    "BOTH": "BOTH",
+                    "NONE": "DOWN"
                 }[upDownArrowState];
                 break;
             default:
-                break; // no action required
+                return; // no action required
         }
+        sendControlStateMessage();
     }
     function keyUpHandler(keyboardEvent) {
         switch (keyboardEvent.code) {
             case "ArrowLeft":
             case "KeyA":
                 leftRightArrowState = {
-                    "left": "none",
-                    "right": "right",
-                    "both": "right",
-                    "none": "none"
+                    "LEFT": "NONE",
+                    "RIGHT": "RIGHT",
+                    "BOTH": "RIGHT",
+                    "NONE": "NONE"
                 }[leftRightArrowState];
                 break;
             case "ArrowRight":
             case "KeyD":
                 leftRightArrowState = {
-                    "left": "left",
-                    "right": "none",
-                    "both": "left",
-                    "none": "none"
+                    "LEFT": "LEFT",
+                    "RIGHT": "NONE",
+                    "BOTH": "LEFT",
+                    "NONE": "NONE"
                 }[leftRightArrowState];
                 break;
             case "ArrowUp":
             case "KeyW":
                 upDownArrowState = {
-                    "up": "none",
-                    "down": "down",
-                    "both": "down",
-                    "none": "none"
+                    "UP": "NONE",
+                    "DOWN": "DOWN",
+                    "BOTH": "DOWN",
+                    "NONE": "NONE"
                 }[upDownArrowState];
                 break;
             case "ArrowDown":
             case "KeyS":
                 upDownArrowState = {
-                    "up": "up",
-                    "down": "none",
-                    "both": "up",
-                    "none": "none"
+                    "UP": "UP",
+                    "DOWN": "NONE",
+                    "BOTH": "UP",
+                    "NONE": "NONE"
                 }[upDownArrowState];
                 break;
             default:
-                break; //no action required
+                return; //no action required
         }
+        sendControlStateMessage();
     }
 
     function setupWebSockets() {
-        socket = new WebSocket("ws://localhost:8080/gameConnect");
-        socket.addEventListener("open", async function (event) {
-            console.log("socket opened, sent 'hello server' to server.");
-            console.log("event:");
+        socket = new WebSocket("ws://localhost:8080/game_connect");
+        socket.addEventListener("open", function (event) {
+            console.log("socket open event:");
             console.log(event);
-            socket.send("hello server!");
         });
         socket.addEventListener("message", webSocketMessage);
-
+        socket.addEventListener("close", console.log);
+    }
+    function sendControlStateMessage() {
+        const gameStateJson ={
+            "gameId": gameId,
+            "udState": upDownArrowState,
+            "lrState": leftRightArrowState,
+            "time": new Date(),
+            "playerPosition": playerPosition
+        };
+        const fullMessage = {"type": "playerControlMessage", "data": gameStateJson };
+        const fullMessageString = JSON.stringify(fullMessage);
+        console.log("sending message: " +fullMessageString);
+        socket.send(fullMessageString);
     }
     function webSocketMessage(event) {
         let sampleMessage = {"paused":false,"p1Score":0,"p2Score":0,"p1PaddleX":0.0,"p1PaddleY":0.0,"p1PaddleZ":0.0,"p1PaddleVx":0.0,"p1PaddleVy":0.0,"p1PaddleVz":0.0,"p2PaddleX":0.0,"p2PaddleY":0.0,"p2PaddleZ":0.0,"p2PaddleVx":0.0,"p2PaddleVy":0.0,"p2PaddleVz":0.0,"ballX":0.0,"ballY":0.0,"ballZ":0.0,"ballVx":0.0,"ballVy":0.0,"ballVz":0.0}
         console.log(event);
-
     }
 
     async function start() {
@@ -236,19 +250,19 @@
         ball.position.x = ((timestamp / 25 + 50) % 100) - 50;
         ball.position.y = ((timestamp / 50 + 50) % 100) - 50;
         vx = {
-            "right": Math.min(vx + 0.1, 2),
-            "left": Math.max(vx - 0.1, -2),
-            "both": 0.90 * vx,
-            "none": 0.90 * vx
+            "RIGHT": Math.min(vx + 0.1, 2),
+            "LEFT": Math.max(vx - 0.1, -2),
+            "BOTH": 0.90 * vx,
+            "NONE": 0.90 * vx
         }[leftRightArrowState];
         if (p1Paddle.position.x > 50) vx = Math.min(vx, 0);
         if (p1Paddle.position.x < -50) vx = Math.max(vx, 0);
         p1Paddle.translateX(vx);
         vz = {
-            "up": Math.min(vz + 0.1, 2),
-            "down": Math.max(vz - 0.1, -2),
-            "both": 0.90 * vz,
-            "none": 0.90 * vz
+            "UP": Math.min(vz + 0.1, 2),
+            "DOWN": Math.max(vz - 0.1, -2),
+            "BOTH": 0.90 * vz,
+            "NONE": 0.90 * vz
         }[upDownArrowState];
         if (p1Paddle.positionZ > 50) vz = Math.min(vz, 0);
         if (p1Paddle.positionZ < -50) vz = Math.max(vz, 0);
@@ -266,4 +280,6 @@
 
     exports.addEventListener("load", start);
     exports.addEventListener("resize", resize);
+    exports.setCameraP1 = setCameraP1;
+    exports.setCameraP2 = setCameraP2;
 })(window);

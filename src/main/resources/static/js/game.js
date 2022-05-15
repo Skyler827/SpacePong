@@ -1,7 +1,6 @@
 // The purpose of this file is to handle the game logic
 // send control state messages out to the server
 // and receive game state updates in from the server
-
 (function(exports) {
     let scene;
     let camera;
@@ -9,6 +8,8 @@
     let geometry;
     let material;
     let ball;
+    let gameState = initialGameState();
+    let lastTick;
     let p1Paddle;
     let p2Paddle;
     let leftWallGridHelper;
@@ -17,9 +18,17 @@
     let upDownArrowState = "NONE";
     let playerPosition = "P1";
     let gameId = 0;
-    let vx = 0;
-    let vz = 0;
     let socket;
+    let paused = true;
+    let gameAnimationFrameId;
+    /*
+    Positive X is P1's left, P2's right
+    Negative X is P1's right, P2's left
+    Positive Y is away from P1, towards P2
+    Negative Y is towards P1, away from P2
+    Positive Z is up for both players
+    Negative Z is down for both players
+     */
 
     function setCameraP1() {
         camera.up.set(0, 0, 1);
@@ -97,12 +106,6 @@
         setFloor();
         setBall();
         setPaddles();
-    }
-
-    function getPaddleCoords() {
-        console.log("p1Paddle x: " + p1Paddle.position.x);
-        console.log("p1Paddle y: " + p1Paddle.position.y);
-        console.log("p1Paddle z: " + p1Paddle.position.z);
     }
 
     function setKeyHandler() {
@@ -196,6 +199,32 @@
         sendControlStateMessage();
     }
 
+    function initialGameState() {
+        return {
+            "paused":true,
+            "p1Score":0,
+            "p2Score":0,
+            "tickInstant":Date.now(),
+            "p1PaddleX":0.0,
+            "p1PaddleY":0.0,
+            "p1PaddleZ":0.0,
+            "p1PaddleVx":0.0,
+            "p1PaddleVy":0.0,
+            "p1PaddleVz":0.0,
+            "p2PaddleX":0.0,
+            "p2PaddleY":0.0,
+            "p2PaddleZ":0.0,
+            "p2PaddleVx":0.0,
+            "p2PaddleVy":0.0,
+            "p2PaddleVz":0.0,
+            "ballX":0.0,
+            "ballY":0.0,
+            "ballZ":0.0,
+            "ballVx":0.0,
+            "ballVy":0.0,
+            "ballVz":0.0
+        };
+    }
     function setupWebSockets() {
         socket = new WebSocket("ws://localhost:8080/game_connect");
         socket.addEventListener("open", function (event) {
@@ -219,8 +248,20 @@
         socket.send(fullMessageString);
     }
     function webSocketMessage(event) {
-        let sampleMessage = {"paused":false,"p1Score":0,"p2Score":0,"p1PaddleX":0.0,"p1PaddleY":0.0,"p1PaddleZ":0.0,"p1PaddleVx":0.0,"p1PaddleVy":0.0,"p1PaddleVz":0.0,"p2PaddleX":0.0,"p2PaddleY":0.0,"p2PaddleZ":0.0,"p2PaddleVx":0.0,"p2PaddleVy":0.0,"p2PaddleVz":0.0,"ballX":0.0,"ballY":0.0,"ballZ":0.0,"ballVx":0.0,"ballVy":0.0,"ballVz":0.0}
-        console.log(event);
+        if (event.data.tickInstant) {
+            handleGameStateMessage(event);
+        }
+    }
+    function handleGameStateMessage(event) {
+        gameState = JSON.parse(event.data);
+        lastTick = new Date(gameState["tickInstant"]);
+        paused = gameState["paused"];
+        if (paused) {
+            cancelAnimationFrame(gameAnimationFrameId);
+            gameAnimationFrameId = null;
+        } else {
+            gameAnimationFrameId = requestAnimationFrame(animate);
+        }
     }
 
     async function start() {
@@ -246,40 +287,46 @@
         animate(0);
     }
 
+    function moveObjects() {
+        const dt = Date.now() - lastTick;
+
+        // I know it would be possible to replace these statements with a double loop
+        // but its more readable this way
+        ball.position.x = gameState.ballX + dt * gameState.ballVx;
+        ball.position.y = gameState.ballY + dt * gameState.ballVy;
+        ball.position.z = gameState.ballZ + dt * gameState.ballVz;
+
+        p1Paddle.position.x = gameState.p1PaddleX + dt * gameState.p1PaddleVx;
+        p1Paddle.position.y = gameState.p1PaddleY + dt * gameState.p1PaddleVy;
+        p1Paddle.position.z = gameState.p1PaddleZ + dt * gameState.p1PaddleVz;
+
+        p2Paddle.position.x = gameState.p2PaddleX + dt * gameState.p2PaddleVx;
+        p2Paddle.position.y = gameState.p2PaddleY + dt * gameState.p2PaddleVy;
+        p2Paddle.position.z = gameState.p2PaddleZ + dt * gameState.p2PaddleVz;
+    }
     function animate(timestamp) {
-        ball.position.x = ((timestamp / 25 + 50) % 100) - 50;
-        ball.position.y = ((timestamp / 50 + 50) % 100) - 50;
-        vx = {
-            "RIGHT": Math.min(vx + 0.1, 2),
-            "LEFT": Math.max(vx - 0.1, -2),
-            "BOTH": 0.90 * vx,
-            "NONE": 0.90 * vx
-        }[leftRightArrowState];
-        if (p1Paddle.position.x > 50) vx = Math.min(vx, 0);
-        if (p1Paddle.position.x < -50) vx = Math.max(vx, 0);
-        p1Paddle.translateX(vx);
-        vz = {
-            "UP": Math.min(vz + 0.1, 2),
-            "DOWN": Math.max(vz - 0.1, -2),
-            "BOTH": 0.90 * vz,
-            "NONE": 0.90 * vz
-        }[upDownArrowState];
-        if (p1Paddle.positionZ > 50) vz = Math.min(vz, 0);
-        if (p1Paddle.positionZ < -50) vz = Math.max(vz, 0);
-        p1Paddle.translateZ(vz);
+        moveObjects(timestamp);
         renderer.render(scene, camera);
-        requestAnimationFrame(animate);
+        gameAnimationFrameId = requestAnimationFrame(animate);
     }
 
     function resize() {
         console.log("window resized");
         const gameContainer = document.querySelector("#game-container");
         renderer.setSize(gameContainer.clientWidth, gameContainer.clientHeight);
-        requestAnimationFrame(animate);
+        gameAnimationFrameId = requestAnimationFrame(animate);
+    }
+    function pause() {
+        socket.send(JSON.stringify({type:"pause"}));
+    }
+    function unpause() {
+        socket.send(JSON.stringify({type:"unpause"}));
     }
 
     exports.addEventListener("load", start);
     exports.addEventListener("resize", resize);
     exports.setCameraP1 = setCameraP1;
     exports.setCameraP2 = setCameraP2;
+    exports.pause = pause;
+    exports.unpause = unpause;
 })(window);

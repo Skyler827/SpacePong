@@ -1,15 +1,11 @@
 package com.skylerdache.spacepong;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skylerdache.spacepong.dto.GameStateDto;
 import com.skylerdache.spacepong.dto.PlayerControlMessage;
 import com.skylerdache.spacepong.dto.PlayerDto;
 import com.skylerdache.spacepong.services.PlayerService;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -20,10 +16,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.io.*;
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.stream.Stream;
 
 @SpringBootApplication
 @EnableScheduling
@@ -77,8 +71,6 @@ public class SpacePongApplication {
             InputStream gsFileStream = new ByteArrayInputStream(gsJsonString.getBytes());
             GameStateDto gsdto2 = m.readValue(gsFileStream, GameStateDto.class);
             System.out.println(gsdto2.ballVz());
-            JSONObject jsonObj = new JSONObject();
-
         } catch (IOException e) {
             System.out.println("IO Exception");
         }

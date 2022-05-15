@@ -61,12 +61,12 @@ public class GameStateSender {
         }
     }
 
-    @Scheduled(fixedRate = 5, timeUnit= TimeUnit.SECONDS)
+    @Scheduled(fixedRate = 100, timeUnit= TimeUnit.MILLISECONDS)
     public void sendGameState() {
-        singlePlayerGameStates.forEach((id, gs) -> {
-            sendMessages(id,createGameStateMessage(gs), singlePlayerWebSockets, PlayerPosition.P1);
-        });
-        twoPlayerGameStates.forEach((id, gs) ->{
+        singlePlayerGameStates.forEach((id, gs) ->
+            sendMessages(id,createGameStateMessage(gs), singlePlayerWebSockets, PlayerPosition.P1)
+        );
+        twoPlayerGameStates.forEach((id, gs) -> {
             TextMessage msg = createGameStateMessage(gs);
             sendMessages(id, msg, p1WebSockets, PlayerPosition.P1);
             sendMessages(id, msg, p2WebSockets, PlayerPosition.P2);

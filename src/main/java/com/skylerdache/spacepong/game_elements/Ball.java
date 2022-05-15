@@ -12,7 +12,7 @@ public class Ball {
     private final SpaceBounds bounds;
     private double x = 0;
     private double y = 0;
-    private double z = 0;
+    private double z = 20;
     private double vx = 1;
     private double vy = 1;
     private double vz = 1;

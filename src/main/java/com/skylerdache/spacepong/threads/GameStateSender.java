@@ -14,6 +14,8 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,12 +23,14 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
 @Service
-public class GameStateSender {
+public class GameStateSender implements Runnable {
     private final Map<Long, WebSocketSession> p1WebSockets;
     private final Map<Long, WebSocketSession> p2WebSockets;
     private final Map<Long, WebSocketSession> singlePlayerWebSockets;
     private final ConcurrentMap<Long, GameStateDto> singlePlayerGameStates;
     private final ConcurrentMap<Long, GameStateDto> twoPlayerGameStates;
+    private static final int TICK_DELAY_MILLIS_INITIAL = 4000;
+    private int TICK_DELAY_MILLIS = TICK_DELAY_MILLIS_INITIAL;
     public GameStateSender() {
         twoPlayerGameStates = new ConcurrentHashMap<>();
         singlePlayerGameStates = new ConcurrentHashMap<>();
@@ -61,9 +65,11 @@ public class GameStateSender {
             }
         }
     }
-
-    @Scheduled(fixedRate = 1, timeUnit= TimeUnit.SECONDS)
-    public void sendGameState() {
+    @Override
+    public void run() {
+        sendAllGameStates();
+    }
+    private void sendAllGameStates() {
         System.out.println("now running gameStateSender.sendGameState()...");
         singlePlayerGameStates.forEach((id, gs) ->
             sendMessages(id, createGameStateMessage(gs), singlePlayerWebSockets, PlayerPosition.P1)

@@ -6,7 +6,6 @@ import com.skylerdache.spacepong.entities.GameEntity;
 import com.skylerdache.spacepong.entities.HumanPlayer;
 import com.skylerdache.spacepong.entities.Player;
 import com.skylerdache.spacepong.game_elements.GameOptions;
-import com.skylerdache.spacepong.game_elements.GameState;
 import com.skylerdache.spacepong.repositories.GameRepository;
 import com.skylerdache.spacepong.threads.GameRunner;
 import com.skylerdache.spacepong.threads.GameStateSender;
@@ -15,6 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.StreamSupport;
 
 @Service
@@ -23,12 +25,16 @@ public class GameService {
     private final GameRunner gameRunner;
     private final GameStateSender gameStateSender;
     private final Map<Long,Long> gameIdByUserId;
+    ScheduledExecutorService executor;
 
-    public GameService(GameRepository gameRepository, GameStateSender gameStateSender) {
+    public GameService(GameRepository gameRepository) {
+        executor = Executors.newScheduledThreadPool(1);
         this.gameRepository = gameRepository;
-        this.gameRunner = new GameRunner(this, gameStateSender);
-        this.gameStateSender = gameStateSender;
-        this.gameIdByUserId = new HashMap<>();
+        gameStateSender = new GameStateSender();
+        gameRunner = new GameRunner(this, gameStateSender);
+        gameIdByUserId = new HashMap<>();
+        executor.scheduleAtFixedRate(gameRunner,0,3, TimeUnit.SECONDS);
+        executor.scheduleAtFixedRate(gameStateSender,0,4,TimeUnit.SECONDS);
     }
     public void startGame(@NotNull Player p1, @NotNull Player p2, GameOptions options) {
         GameEntity newGame = new GameEntity();

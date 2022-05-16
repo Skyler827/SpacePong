@@ -89,12 +89,8 @@ public class GameState {
 
     public void update(PlayerControlMessage m) {
         switch (m.playerPosition()) {
-            case P1 -> {
-                p1Control = new PlayerControlState(m.lrState(), m.udState());
-            }
-            case P2 -> {
-                p2Control = new PlayerControlState(m.lrState(), m.udState());
-            }
+            case P1 -> p1Control = new PlayerControlState(m.lrState(), m.udState());
+            case P2 -> p2Control = new PlayerControlState(m.lrState(), m.udState());
         }
     }
     public boolean isPaused() { return paused; }

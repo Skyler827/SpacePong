@@ -118,7 +118,6 @@
         window.addEventListener("keyup", keyUpHandler);
     }
     function keyDownHandler(keyboardEvent) {
-        console.log(keyboardEvent);
         // there is a bug affecting firefox on linux that requiring the following workaround:
         // https://bugzilla.mozilla.org/show_bug.cgi?id=1594003
         if (firefoxX11) {
@@ -127,7 +126,6 @@
         } else {
             if (keyboardEvent.repeat) return;
         }
-        console.log("no early return");
         switch (keyboardEvent.code) {
             case "ArrowLeft":
             case "KeyA":

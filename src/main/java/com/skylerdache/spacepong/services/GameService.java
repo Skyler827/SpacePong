@@ -28,7 +28,7 @@ public class GameService {
     ScheduledExecutorService executor;
 
     public GameService(GameRepository gameRepository) {
-        executor = Executors.newScheduledThreadPool(1);
+        executor = Executors.newScheduledThreadPool(2);
         this.gameRepository = gameRepository;
         gameStateSender = new GameStateSender();
         gameRunner = new GameRunner(this, gameStateSender);

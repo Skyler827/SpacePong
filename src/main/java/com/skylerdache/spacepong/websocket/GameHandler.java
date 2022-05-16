@@ -3,6 +3,7 @@ package com.skylerdache.spacepong.websocket;
 import com.skylerdache.spacepong.dto.PlayerControlMessage;
 import com.skylerdache.spacepong.entities.HumanPlayer;
 import com.skylerdache.spacepong.services.GameService;
+import com.skylerdache.spacepong.services.PlayerService;
 import nonapi.io.github.classgraph.json.JSONDeserializer;
 import nonapi.io.github.classgraph.json.JSONSerializer;
 import org.jetbrains.annotations.NotNull;
@@ -18,9 +19,11 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 @Service
 public class GameHandler extends TextWebSocketHandler {
     private final GameService gameService;
+    private final PlayerService playerService;
 
-    public GameHandler(GameService gameService) {
+    public GameHandler(GameService gameService, PlayerService playerService) {
         this.gameService = gameService;
+        this.playerService = playerService;
     }
     @Override
     public void afterConnectionEstablished(@NotNull WebSocketSession session) {
@@ -48,7 +51,7 @@ public class GameHandler extends TextWebSocketHandler {
             throw new RuntimeException("this shouldn't happen");
         }
         UsernamePasswordAuthenticationToken principal = (UsernamePasswordAuthenticationToken) session.getPrincipal();
-        HumanPlayer p = (HumanPlayer)principal.getPrincipal();
+        HumanPlayer p = playerService.getHumanPlayerByName(principal.getName());
         System.out.println("user connected: " + p.getUsername());
         JSONObject o;
         String type;

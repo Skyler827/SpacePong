@@ -70,15 +70,20 @@ public class GameStateSender implements Runnable {
         sendAllGameStates();
     }
     private void sendAllGameStates() {
-        System.out.println("now running gameStateSender.sendGameState()...");
-        singlePlayerGameStates.forEach((id, gs) ->
-            sendMessages(id, createGameStateMessage(gs), singlePlayerWebSockets, PlayerPosition.P1)
-        );
-        twoPlayerGameStates.forEach((id, gs) -> {
-            TextMessage msg = createGameStateMessage(gs);
-            sendMessages(id, msg, p1WebSockets, PlayerPosition.P1);
-            sendMessages(id, msg, p2WebSockets, PlayerPosition.P2);
-        });
+        System.out.println("now running gameStateSender.sendAllGameStates()... (sp size: "+
+                singlePlayerGameStates.size()+", mp size:"+twoPlayerGameStates.size()+")");
+        synchronized(singlePlayerGameStates) {
+            singlePlayerGameStates.forEach((id, gs) ->
+                    sendMessages(id, createGameStateMessage(gs), singlePlayerWebSockets, PlayerPosition.P1)
+            );
+        }
+        synchronized(twoPlayerGameStates) {
+            twoPlayerGameStates.forEach((id, gs) -> {
+                TextMessage msg = createGameStateMessage(gs);
+                sendMessages(id, msg, p1WebSockets, PlayerPosition.P1);
+                sendMessages(id, msg, p2WebSockets, PlayerPosition.P2);
+            });
+        }
     }
     @Contract("_ -> new")
     private @NotNull TextMessage createGameStateMessage(@NotNull GameStateDto gs) {
@@ -103,9 +108,9 @@ public class GameStateSender implements Runnable {
 
     public void updateGameDto(GameEntity gameEntity, GameStateDto dto) {
         if (gameEntity.getPlayer2() instanceof HumanPlayer) {
-            singlePlayerGameStates.put(gameEntity.getId(),dto);
-        } else {
             twoPlayerGameStates.put(gameEntity.getId(), dto);
+        } else {
+            singlePlayerGameStates.put(gameEntity.getId(),dto);
         }
     }
 }

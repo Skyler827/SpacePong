@@ -35,9 +35,9 @@ public class GameRunner implements Runnable {
         if (games.size() > 0) {
             System.out.println("paused: "+games.get(games.keySet().stream().findFirst().orElseThrow()).isPaused());
         }
-        games.forEach(this::tickOneGame);
+        games.forEach(this::handleMessagesAndTickGame);
     }
-    private void tickOneGame(long id, @NotNull GameState game) {
+    private void handleMessagesAndTickGame(long id, @NotNull GameState game) {
         System.out.println("ticking game: "+ id);
         if (game.isPaused()) return;
         Instant currentTickStart = Instant.now();
@@ -74,7 +74,9 @@ public class GameRunner implements Runnable {
             tickGame(game,timeMillis);
         }
         GameEntity ge = game.getGameEntity();
+        System.out.println("about to send update to gameStateSender about game....");
         gameStateSender.updateGameDto(ge, game.getDto());
+        System.out.println("just sent info");
     }
     public void updatePlayerControl(@NotNull PlayerControlMessage m) {
         synchronized(controlMessages) {

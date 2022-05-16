@@ -5,6 +5,7 @@ import lombok.Data;
 import org.json.JSONObject;
 
 import java.io.Serializable;
+import java.time.Instant;
 
 @JsonSerialize
 public record GameStateDto (
@@ -30,4 +31,31 @@ public record GameStateDto (
     double ballVx,
     double ballVy,
     double ballVz
-) implements Serializable {}
+) implements Serializable {
+    public GameStateDto() {
+        this(
+            true,
+            0,
+            0,
+            Instant.now().toString(),
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        );
+    }
+}

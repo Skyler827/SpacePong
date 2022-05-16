@@ -26,7 +26,7 @@ public class GameService {
 
     public GameService(GameRepository gameRepository, GameStateSender gameStateSender) {
         this.gameRepository = gameRepository;
-        this.gameRunner = new GameRunner(this);
+        this.gameRunner = new GameRunner(this, gameStateSender);
         this.gameStateSender = gameStateSender;
         this.gameIdByUserId = new HashMap<>();
     }
@@ -38,12 +38,12 @@ public class GameService {
         GameEntity savedGame = gameRepository.save(newGame);
         gameIdByUserId.put(p1.getId(), savedGame.getId());
         gameIdByUserId.put(p2.getId(), savedGame.getId());
-        GameState gs = gameRunner.newGame(savedGame, options);
+        gameRunner.newGame(savedGame, options);
         if (p2 instanceof HumanPlayer) {
-            gameStateSender.addTwoPlayerGame(savedGame.getId(), gs);
+            gameStateSender.addTwoPlayerGame(savedGame.getId());
         }
         if (p2 instanceof ComputerPlayer) {
-            gameStateSender.addSinglePlayerGame(savedGame.getId(), gs);
+            gameStateSender.addSinglePlayerGame(savedGame.getId());
             // initialize computer player and start game here
         }
     }
@@ -82,10 +82,10 @@ public class GameService {
 
     }
 
-    public void pause(HumanPlayer p) {
+    public void pause(@NotNull HumanPlayer p) {
         gameRunner.pauseGame(gameIdByUserId.get(p.getId()));
     }
-    public void unpause(HumanPlayer p) {
+    public void unpause(@NotNull HumanPlayer p) {
         gameRunner.unpauseGame(gameIdByUserId.get(p.getId()));
     }
 }

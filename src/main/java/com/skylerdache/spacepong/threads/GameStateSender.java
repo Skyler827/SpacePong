@@ -2,14 +2,15 @@ package com.skylerdache.spacepong.threads;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.skylerdache.spacepong.dto.GameStateDto;
+import com.skylerdache.spacepong.entities.GameEntity;
+import com.skylerdache.spacepong.entities.HumanPlayer;
 import com.skylerdache.spacepong.enums.PlayerPosition;
-import com.skylerdache.spacepong.game_elements.GameState;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
@@ -24,8 +25,8 @@ public class GameStateSender {
     private final Map<Long, WebSocketSession> p1WebSockets;
     private final Map<Long, WebSocketSession> p2WebSockets;
     private final Map<Long, WebSocketSession> singlePlayerWebSockets;
-    private final ConcurrentMap<Long, GameState> singlePlayerGameStates;
-    private final ConcurrentMap<Long, GameState> twoPlayerGameStates;
+    private final ConcurrentMap<Long, GameStateDto> singlePlayerGameStates;
+    private final ConcurrentMap<Long, GameStateDto> twoPlayerGameStates;
     public GameStateSender() {
         twoPlayerGameStates = new ConcurrentHashMap<>();
         singlePlayerGameStates = new ConcurrentHashMap<>();
@@ -33,11 +34,11 @@ public class GameStateSender {
         p2WebSockets = new HashMap<>();
         singlePlayerWebSockets = new HashMap<>();
     }
-    public synchronized void addSinglePlayerGame(long id, GameState gs) {
-        singlePlayerGameStates.put(id, gs);
+    public synchronized void addSinglePlayerGame(long id) {
+        singlePlayerGameStates.put(id, null);
     }
-    public synchronized void addTwoPlayerGame(long id, GameState gs) {
-        twoPlayerGameStates.put(id, gs);
+    public synchronized void addTwoPlayerGame(long id) {
+        twoPlayerGameStates.put(id, new GameStateDto());
     }
     public synchronized void playerConnect(long gameId, WebSocketSession s) {
         if (twoPlayerGameStates.containsKey(gameId)) {
@@ -61,10 +62,11 @@ public class GameStateSender {
         }
     }
 
-    @Scheduled(fixedRate = 100, timeUnit= TimeUnit.MILLISECONDS)
+    @Scheduled(fixedRate = 1, timeUnit= TimeUnit.SECONDS)
     public void sendGameState() {
+        System.out.println("now running gameStateSender.sendGameState()...");
         singlePlayerGameStates.forEach((id, gs) ->
-            sendMessages(id,createGameStateMessage(gs), singlePlayerWebSockets, PlayerPosition.P1)
+            sendMessages(id, createGameStateMessage(gs), singlePlayerWebSockets, PlayerPosition.P1)
         );
         twoPlayerGameStates.forEach((id, gs) -> {
             TextMessage msg = createGameStateMessage(gs);
@@ -73,22 +75,31 @@ public class GameStateSender {
         });
     }
     @Contract("_ -> new")
-    private @NotNull TextMessage createGameStateMessage(@NotNull GameState gs) {
+    private @NotNull TextMessage createGameStateMessage(@NotNull GameStateDto gs) {
         ObjectMapper m = new ObjectMapper();
         try {
-            return new TextMessage(m.writeValueAsString(gs.getDto()));
+            return new TextMessage(m.writeValueAsString(gs));
         } catch (JsonProcessingException e) {
             throw new RuntimeException("shouldn't ever happen");
         }
     }
     private void sendMessages(long id, TextMessage msg, @NotNull Map<Long, WebSocketSession> sockets, PlayerPosition p) {
+        System.out.println("sending to "+p.toString()+": "+msg.getPayload());
         try {
             sockets.get(id).sendMessage(msg);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (NullPointerException e) {
-            System.out.println("unable to send the following data to "+p.toString());
+            System.out.println("unable to send the following data to "+ p);
             System.out.println(msg.getPayload());
+        }
+    }
+
+    public void updateGameDto(GameEntity gameEntity, GameStateDto dto) {
+        if (gameEntity.getPlayer2() instanceof HumanPlayer) {
+            singlePlayerGameStates.put(gameEntity.getId(),dto);
+        } else {
+            twoPlayerGameStates.put(gameEntity.getId(), dto);
         }
     }
 }

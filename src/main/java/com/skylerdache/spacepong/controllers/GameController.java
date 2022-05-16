@@ -27,7 +27,8 @@ public class GameController {
         if (game == null) {
             Player p = playerService.getPlayerByName(principal.getName());
             try {
-                model.addAttribute("gameId", gameService.getOngoingGameByPlayer(p).getId());
+                GameEntity e = gameService.getOngoingGameByPlayer(p);
+                model.addAttribute("gameId", e.getId());
             } catch (NoSuchElementException e) {
                 String message = "You are not in any current game";
                 System.out.println(message);

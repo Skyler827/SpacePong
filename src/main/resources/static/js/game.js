@@ -21,6 +21,11 @@
     let socket;
     let paused = true;
     let gameAnimationFrameId;
+    let pressedKeys;
+    const userAgent = navigator.userAgent;
+    const firefoxX11 = userAgent.includes("Firefox") && userAgent.includes("Linux");
+    console.log("firefoxX11: "+firefoxX11);
+    pressedKeys = new Set();
     /*
     Positive X is P1's left, P2's right
     Negative X is P1's right, P2's left
@@ -113,6 +118,16 @@
         window.addEventListener("keyup", keyUpHandler);
     }
     function keyDownHandler(keyboardEvent) {
+        console.log(keyboardEvent);
+        // there is a bug affecting firefox on linux that requiring the following workaround:
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=1594003
+        if (firefoxX11) {
+            if (pressedKeys.has(keyboardEvent.code)) return;
+            pressedKeys.add(keyboardEvent.code);
+        } else {
+            if (keyboardEvent.repeat) return;
+        }
+        console.log("no early return");
         switch (keyboardEvent.code) {
             case "ArrowLeft":
             case "KeyA":
@@ -156,6 +171,9 @@
         sendControlStateMessage();
     }
     function keyUpHandler(keyboardEvent) {
+        if (firefoxX11) {
+            pressedKeys.delete(keyboardEvent.code);
+        }
         switch (keyboardEvent.code) {
             case "ArrowLeft":
             case "KeyA":
@@ -235,33 +253,39 @@
         socket.addEventListener("close", console.log);
     }
     function sendControlStateMessage() {
-        const gameStateJson ={
+        const controlStateJson ={
             "gameId": gameId,
             "udState": upDownArrowState,
             "lrState": leftRightArrowState,
             "time": new Date(),
             "playerPosition": playerPosition
         };
-        const fullMessage = {"type": "playerControlMessage", "data": gameStateJson };
+        const fullMessage = {"type": "playerControlMessage", "data": controlStateJson };
         const fullMessageString = JSON.stringify(fullMessage);
-        console.log("sending message: " +fullMessageString);
+        // console.log("sending message: " +fullMessageString);
         socket.send(fullMessageString);
     }
     function webSocketMessage(event) {
-        if (event.data.tickInstant) {
-            handleGameStateMessage(event);
+        let messageData = JSON.parse(event.data);
+        if (messageData.tickInstant) {
+            handleGameStateMessage(messageData);
+        } else {
+            handleInitializationMessage(messageData);
         }
     }
-    function handleGameStateMessage(event) {
-        gameState = JSON.parse(event.data);
+    function handleGameStateMessage(gameState) {
         lastTick = new Date(gameState["tickInstant"]);
         paused = gameState["paused"];
         if (paused) {
-            cancelAnimationFrame(gameAnimationFrameId);
+            exports.cancelAnimationFrame(gameAnimationFrameId);
             gameAnimationFrameId = null;
         } else {
-            gameAnimationFrameId = requestAnimationFrame(animate);
+            gameAnimationFrameId = exports.requestAnimationFrame(animate);
         }
+    }
+    function handleInitializationMessage(data) {
+        console.log("initialization event:");
+        console.log(data);
     }
 
     async function start() {

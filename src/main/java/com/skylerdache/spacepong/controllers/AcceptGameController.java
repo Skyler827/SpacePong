@@ -34,8 +34,8 @@ public class AcceptGameController {
         HumanPlayer acceptingPlayer = playerService.getHumanPlayerByName(principal.getName());
         GameOptions options = onlineService.getProposedGameOptions(
                 challenger.getUsername(), acceptingPlayer.getUsername());
-        onlineService.notifyGameAccepted(challenger.getUsername(), acceptingPlayer.getUsername());
         gameService.startGame(acceptingPlayer, challenger, options);
+        onlineService.notifyGameAccepted(challenger.getUsername(), acceptingPlayer.getUsername());
         return "redirect:/game";
     }
     @PostMapping("/handle_proposal/reject")

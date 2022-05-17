@@ -39,7 +39,11 @@ public class GameRunner implements Runnable {
     }
     private void handleMessagesAndTickGame(long id, @NotNull GameState game) {
         System.out.println("ticking game: "+ id);
-        if (game.isPaused()) return;
+        GameEntity ge = game.getGameEntity();
+        if (game.isPaused()) {
+            gameStateSender.updateGameDto(ge, game.getDto());
+            return;
+        }
         Instant currentTickStart = Instant.now();
         Instant previousTickStart = currentTickStart.minus(TICK_DELAY_MILLIS, ChronoUnit.MILLIS);
         BlockingQueue<PlayerControlMessage> messages = controlMessages.get(id);
@@ -73,7 +77,6 @@ public class GameRunner implements Runnable {
             double timeMillis = dt.get(ChronoUnit.MILLIS);
             tickGame(game,timeMillis);
         }
-        GameEntity ge = game.getGameEntity();
         System.out.println("about to send update to gameStateSender about game....");
         gameStateSender.updateGameDto(ge, game.getDto());
         System.out.println("just sent info");

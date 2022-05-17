@@ -271,7 +271,8 @@
             handleInitializationMessage(messageData);
         }
     }
-    function handleGameStateMessage(gameState) {
+    function handleGameStateMessage(messageData) {
+        gameState = messageData;
         lastTick = new Date(gameState["tickInstant"]);
         paused = gameState["paused"];
         if (paused) {

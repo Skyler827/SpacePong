@@ -27,7 +27,7 @@ public class GameState {
     private boolean paused = true;
     public GameState(GameOptions options, GameEntity gameEntity) {
         scoreThreshHold = options.getScoreThreshold();
-        ball = new Ball(1);
+        ball = new Ball(4);
         p1Paddle = new Paddle(PlayerPosition.P1);
         p2Paddle = new Paddle(PlayerPosition.P2);
         p1Control = new PlayerControlState(LeftRightArrowState.NONE, UpDownArrowState.NONE);

@@ -315,8 +315,8 @@
     }
 
     function moveObjects() {
-        const now = new Date();
-        const dt = (now - lastTick)/1000;
+        /** number of seconds since previous update */
+        const dt = (new Date() - lastTick)/100;
 
         // I know it would be possible to replace these statements with a double loop
         // but its more readable this way
@@ -332,8 +332,8 @@
         p2Paddle.position.y = gameState.p2PaddleY + dt * gameState.p2PaddleVy;
         p2Paddle.position.z = gameState.p2PaddleZ + dt * gameState.p2PaddleVz;
     }
-    function animate(timestamp) {
-        moveObjects(timestamp);
+    function animate(_) {
+        moveObjects();
         renderer.render(scene, camera);
         if (paused) return;
         gameAnimationFrameId = requestAnimationFrame(animate);

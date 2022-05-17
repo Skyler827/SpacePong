@@ -74,9 +74,12 @@ public class Ball {
         }
     }
     public void resetPosition() {
-        this.x = 0;
-        this.y = 0;
-        this.z = 0;
+        this.x = 80*Math.random()-40;
+        this.y = 80*Math.random()-40;
+        this.z = 80*Math.random()-40;
+        this.vx = 2*Math.random()-1;
+        this.vy = 2*Math.random()-1;
+        this.vz = Math.random() > 0.5 ? 1 : -1;
     }
 
     public String getPosition() {

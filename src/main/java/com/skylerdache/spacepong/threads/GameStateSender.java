@@ -44,12 +44,21 @@ public class GameStateSender implements Runnable {
     public synchronized void addTwoPlayerGame(long id) {
         twoPlayerGameStates.put(id, new GameStateDto());
     }
-    public synchronized void playerConnect(long gameId, WebSocketSession s) {
+
+    /**
+     * registers a websocket connection from a user
+     * @param gameId the id of the game
+     * @param s the websocket session of the connecting user
+     * @return true if all players are connected, false otherwise
+     */
+    public synchronized boolean playerConnect(long gameId, WebSocketSession s) {
         if (twoPlayerGameStates.containsKey(gameId)) {
             if (p1WebSockets.containsKey(gameId)) {
                 p2WebSockets.put(gameId, s);
+                return false;
             } else {
                 p1WebSockets.put(gameId, s);
+                return true;
             }
         } else {
             if (singlePlayerGameStates.containsKey(gameId)) {
@@ -63,6 +72,7 @@ public class GameStateSender implements Runnable {
                     e.printStackTrace();
                 }
             }
+            return true;
         }
     }
     @Override

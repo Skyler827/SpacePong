@@ -60,7 +60,10 @@ public class GameService {
     public void userConnected(HumanPlayer p, WebSocketSession s) {
         try {
             long gameId = gameIdByUserId.get(p.getId());
-            gameStateSender.playerConnect(gameId, s);
+            boolean allUsersConnected = gameStateSender.playerConnect(gameId, s);
+            if (allUsersConnected) {
+                gameRunner.unpauseGame(gameId);
+            }
         } catch (NoSuchElementException e) {
             e.printStackTrace();
         }

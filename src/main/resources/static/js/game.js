@@ -274,12 +274,13 @@
     function handleGameStateMessage(messageData) {
         gameState = messageData;
         lastTick = new Date(gameState["tickInstant"]);
+        console.log("lastTick = "+lastTick);
         paused = gameState["paused"];
         if (paused) {
-            exports.cancelAnimationFrame(gameAnimationFrameId);
+            cancelAnimationFrame(gameAnimationFrameId);
             gameAnimationFrameId = null;
         } else {
-            gameAnimationFrameId = exports.requestAnimationFrame(animate);
+            gameAnimationFrameId = requestAnimationFrame(animate);
         }
     }
     function handleInitializationMessage(data) {
@@ -311,13 +312,14 @@
     }
 
     function moveObjects() {
-        const dt = Date.now() - lastTick;
+        const now = new Date();
+        const dt = now - lastTick;
 
         // I know it would be possible to replace these statements with a double loop
         // but its more readable this way
-        ball.position.x = gameState.ballX + dt * gameState.ballVx;
-        ball.position.y = gameState.ballY + dt * gameState.ballVy;
-        ball.position.z = gameState.ballZ + dt * gameState.ballVz;
+        ball.position.x = gameState.ballX + dt * gameState.ballVx/1000;
+        ball.position.y = gameState.ballY + dt * gameState.ballVy/1000;
+        ball.position.z = gameState.ballZ + dt * gameState.ballVz/1000;
 
         p1Paddle.position.x = gameState.p1PaddleX + dt * gameState.p1PaddleVx;
         p1Paddle.position.y = gameState.p1PaddleY + dt * gameState.p1PaddleVy;

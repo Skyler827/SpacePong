@@ -96,9 +96,15 @@ public class GameRunner implements Runnable {
         GameState gs = new GameState(options, e);
         games.put(e.getId(), gs);
     }
+
+    /**
+     * simulates a game for a given number of milliseconds
+     * @param game the game state
+     * @param dt number of milliseconds
+     */
     private void tickGame(@NotNull GameState game, double dt) {
         try {
-            game.tick(dt);
+            game.tick(1000*dt);
         } catch (GameOverException e) {
             GameEntity ge = game.getGameEntity();
             ge.setP1Score(e.p1Score);

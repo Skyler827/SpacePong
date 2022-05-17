@@ -21,6 +21,7 @@ public class Ball {
         this.bounds = spaceBounds;
     }
     public void tick(double dt, Paddle p1Paddle, Paddle p2Paddle) throws PlayerScoreException {
+        double prevX = x;
         // bounce logic:
         // X axis (positive X is p1's right, p2's left) :
         if (x + dt*vx + radius > bounds.XMax()) { //above max, bounce down:
@@ -31,6 +32,7 @@ public class Ball {
         } else { //within range:
             x += dt * vx;
         }
+        System.out.println("ball ticking: x from "+prevX+" to "+x);
         // Y axis (positive Y is up, negative Y is down):
         if (y + dt*vy + radius > bounds.YMax()) { //above max, bounce down:
             y = 2 * bounds.YMax() - y - vy*dt;

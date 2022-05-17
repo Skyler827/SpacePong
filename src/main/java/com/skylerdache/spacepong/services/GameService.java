@@ -33,8 +33,8 @@ public class GameService {
         gameStateSender = new GameStateSender();
         gameRunner = new GameRunner(this, gameStateSender);
         gameIdByUserId = new HashMap<>();
-        executor.scheduleAtFixedRate(gameRunner,0,3, TimeUnit.SECONDS);
-        executor.scheduleAtFixedRate(gameStateSender,0,4,TimeUnit.SECONDS);
+        executor.scheduleAtFixedRate(gameRunner,0,100, TimeUnit.MILLISECONDS);
+        executor.scheduleAtFixedRate(gameStateSender,0,100,TimeUnit.MILLISECONDS);
     }
     public void startGame(@NotNull Player p1, @NotNull Player p2, GameOptions options) {
         GameEntity newGame = new GameEntity();

@@ -34,6 +34,12 @@ public class GameState {
         p2Control = new PlayerControlState(LeftRightArrowState.NONE, UpDownArrowState.NONE);
         this.gameEntity = gameEntity;
     }
+
+    /**
+     * simulates a game for a given number of seconds
+     * @param dt number of seconds
+     * @throws GameOverException if one player or another wins the game
+     */
     public void tick(double dt) throws GameOverException{
         if (paused) return;
         p1Paddle.tick(dt, p1Control);

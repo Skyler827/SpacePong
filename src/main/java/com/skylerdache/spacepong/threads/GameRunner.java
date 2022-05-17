@@ -104,7 +104,7 @@ public class GameRunner implements Runnable {
      */
     private void tickGame(@NotNull GameState game, double dt) {
         try {
-            game.tick(1000*dt);
+            game.tick(dt/1000);
         } catch (GameOverException e) {
             GameEntity ge = game.getGameEntity();
             ge.setP1Score(e.p1Score);

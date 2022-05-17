@@ -12,23 +12,36 @@ public class Ball {
     private final SpaceBounds bounds;
     private double x = 0;
     private double y = 0;
-    private double z = 20;
-    private double vx = 1;
-    private double vy = 1;
-    private double vz = 1;
+    private double z = 0;
+    private double vx = 2;
+    private double vy = 1.3;
+    private double vz = -0.3;
     public Ball(double radius, SpaceBounds spaceBounds) {
         this.radius = radius;
         this.bounds = spaceBounds;
     }
+
+    public Ball(double radius) {
+        this(radius,new SpaceBounds());
+    }
+    /**
+     * simulates the motion of the ball
+     * @param dt number of seconds
+     * @param p1Paddle p1 paddle
+     * @param p2Paddle p2 paddle
+     * @throws PlayerScoreException if the ball goes out of bounds in a way that a player scores a point
+     */
     public void tick(double dt, Paddle p1Paddle, Paddle p2Paddle) throws PlayerScoreException {
         double prevX = x;
         // bounce logic:
         // X axis (positive X is p1's right, p2's left) :
         if (x + dt*vx + radius > bounds.XMax()) { //above max, bounce down:
             x = 2*bounds.XMax() - x - vx*dt;
+            vx = -vx;
         }
         else if (x + dt*vx - radius < bounds.XMin()) { //below min, bounce up:
             x = 2*bounds.XMin() - x - vx*dt;
+            vx = -vx;
         } else { //within range:
             x += dt * vx;
         }
@@ -36,23 +49,25 @@ public class Ball {
         // Y axis (positive Y is up, negative Y is down):
         if (y + dt*vy + radius > bounds.YMax()) { //above max, bounce down:
             y = 2 * bounds.YMax() - y - vy*dt;
-        } else if (y + dt*vy - radius < bounds.YMin()) { //below min, bounce down:
+            vy = -vy;
+        } else if (y + dt*vy - radius < bounds.YMin()) { //below min, bounce up:
             y = 2 * bounds.YMin() - y - vy*dt;
+            vy = -vy;
         } else { //within range:
             y += dt * vy;
         }
-        // Z axis (positive Z is towards P2, negative Z is towards P1):
-        if (z + dt*vz + radius > bounds.ZMax()) { //above max, check for collision with p2's paddle:
-            if (p2Paddle.ballInRange(this)) {
+        // Z axis (positive Z is towards P1, negative Z is towards P2):
+        if (z + dt*vz + radius > bounds.ZMax()) { //above max, check for collision with p1's paddle:
+            if (p1Paddle.ballInRange(this)) {
                 z = 2*bounds.ZMax() - z - vz*dt;
             } else {
-                throw new PlayerScoreException(PlayerPosition.P1);
+                throw new PlayerScoreException(PlayerPosition.P2);
             }
-        } else if (z + dt*vz - radius < bounds.ZMin()) { //below min, check for collision with p1's paddle:
-            if (p1Paddle.ballInRange(this)) {
+        } else if (z + dt*vz - radius < bounds.ZMin()) { //below min, check for collision with p2's paddle:
+            if (p2Paddle.ballInRange(this)) {
                 z = 2*bounds.ZMin() - z - vz*dt;
             } else {
-                throw new PlayerScoreException(PlayerPosition.P2);
+                throw new PlayerScoreException(PlayerPosition.P1);
             }
         } else { //within range:
             z += dt * vz;

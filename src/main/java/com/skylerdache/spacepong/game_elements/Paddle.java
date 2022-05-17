@@ -3,6 +3,7 @@ package com.skylerdache.spacepong.game_elements;
 import com.skylerdache.spacepong.enums.PlayerPosition;
 import lombok.Getter;
 import lombok.Setter;
+import org.jetbrains.annotations.Contract;
 
 @Getter
 @Setter
@@ -17,6 +18,15 @@ public class Paddle {
     private double vy;
     private double vz;
     private PlayerPosition pos;
+    @Contract(pure = true)
+    public Paddle(PlayerPosition p) {
+        this();
+        pos = p;
+        z = switch (p) {
+            case P1 -> -50;
+            case P2 -> 50;
+        };
+    }
     public Paddle() {
         x_length = 10;
         y_length = 10;
@@ -27,12 +37,18 @@ public class Paddle {
         vx = 1;
         vy = 1;
         vz = 1;
+        pos = PlayerPosition.P1;
     }
     private double xMax() {return x+x_length/2;}
     private double xMin() {return x-x_length/2;}
     private double yMax() {return y+y_length/2;}
     private double yMin() {return y-y_length/2;}
 
+    /**
+     * simulates the motion of the paddle
+     * @param dt number of seconds
+     * @param playerControlState control inputs to the paddle
+     */
     public void tick(double dt, PlayerControlState playerControlState) {
         x += dt * vx;
         y += dt * vy;

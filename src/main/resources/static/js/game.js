@@ -27,26 +27,26 @@
     console.log("firefoxX11: "+firefoxX11);
     pressedKeys = new Set();
     /*
-    Positive X is P1's left, P2's right
-    Negative X is P1's right, P2's left
-    Positive Y is away from P1, towards P2
-    Negative Y is towards P1, away from P2
-    Positive Z is up for both players
-    Negative Z is down for both players
+    Positive X is P1's right, P2's left
+    Negative X is P1's left, P2's right
+    Positive Y is up for both players
+    Negative Y is down for both players
+    Positive Z is towards P1, away from P2
+    Negative Z is away from P1, towards P2
      */
 
     function setCameraP1() {
-        camera.up.set(0, 0, 1);
-        camera.position.y = -100;
-        camera.position.z = 65;
-        camera.lookAt(new THREE.Vector3(0, 0, 35));
+        camera.up.set(0, 1, 0);
+        camera.position.y = 65;
+        camera.position.z = 100;
+        camera.lookAt(new THREE.Vector3(0, 0, 0));
     }
 
     function setCameraP2() {
-        camera.up.set(0, 0, 1);
-        camera.position.y = 100;
-        camera.position.z = 65;
-        camera.lookAt(new THREE.Vector3(0, 0, 35));
+        camera.up.set(0, 1, 0);
+        camera.position.y = 65;
+        camera.position.z = -100;
+        camera.lookAt(new THREE.Vector3(0, 0, 0));
     }
 
     function setWalls() {
@@ -55,22 +55,22 @@
         const leftWall = new THREE.Mesh(wallGeometry, wallMaterial);
         const rightWall = new THREE.Mesh(wallGeometry, wallMaterial);
         leftWall.translateX(-50);
-        leftWall.translateZ(50);
+        leftWall.translateY(50);
         rightWall.translateX(50);
-        rightWall.translateZ(50);
+        rightWall.translateY(50);
         // leftWall.position = new THREE.Vector3(-50,-50,0);
         scene.add(leftWall);
         scene.add(rightWall);
 
         leftWallGridHelper = new THREE.GridHelper(100, 10);
         leftWallGridHelper.translateX(-49.4);
-        leftWallGridHelper.translateZ(50);
+        leftWallGridHelper.translateY(50);
         leftWallGridHelper.rotateZ(Math.PI / 2);
         scene.add(leftWallGridHelper);
 
         rightWallGridHelper = new THREE.GridHelper(100, 10);
         rightWallGridHelper.translateX(49.4);
-        rightWallGridHelper.translateZ(50);
+        rightWallGridHelper.translateY(50);
         rightWallGridHelper.rotateZ(Math.PI / 2);
         scene.add(rightWallGridHelper);
     }
@@ -79,6 +79,8 @@
         const floorMaterial = new THREE.MeshLambertMaterial({color: 0x09702d});
         const floorGeometry = new THREE.PlaneGeometry(100, 100);
         const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+        floor.rotateX(Math.PI/2);
+        floor.translateY(-50);
         scene.add(floor);
     }
 
@@ -86,7 +88,6 @@
         const ballMaterial = new THREE.MeshLambertMaterial({color: 0xA2294D});
         const ballGeometry = new THREE.SphereGeometry(4, 32, 32);
         ball = new THREE.Mesh(ballGeometry, ballMaterial);
-        ball.translateZ(20);
         scene.add(ball);
     }
 
@@ -276,6 +277,8 @@
         lastTick = new Date(gameState["tickInstant"]);
         console.log("lastTick = "+lastTick);
         paused = gameState["paused"];
+        document.querySelector("#p1-score").textContent = gameState.p1Score;
+        document.querySelector("#p2-score").textContent = gameState.p2Score;
         if (paused) {
             cancelAnimationFrame(gameAnimationFrameId);
             gameAnimationFrameId = null;
@@ -313,13 +316,13 @@
 
     function moveObjects() {
         const now = new Date();
-        const dt = now - lastTick;
+        const dt = (now - lastTick)/1000;
 
         // I know it would be possible to replace these statements with a double loop
         // but its more readable this way
-        ball.position.x = gameState.ballX + dt * gameState.ballVx/1000;
-        ball.position.y = gameState.ballY + dt * gameState.ballVy/1000;
-        ball.position.z = gameState.ballZ + dt * gameState.ballVz/1000;
+        ball.position.x = gameState.ballX + dt * gameState.ballVx;
+        ball.position.y = gameState.ballY + dt * gameState.ballVy;
+        ball.position.z = gameState.ballZ + dt * gameState.ballVz;
 
         p1Paddle.position.x = gameState.p1PaddleX + dt * gameState.p1PaddleVx;
         p1Paddle.position.y = gameState.p1PaddleY + dt * gameState.p1PaddleVy;
@@ -332,6 +335,7 @@
     function animate(timestamp) {
         moveObjects(timestamp);
         renderer.render(scene, camera);
+        if (paused) return;
         gameAnimationFrameId = requestAnimationFrame(animate);
     }
 

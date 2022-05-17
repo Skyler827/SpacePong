@@ -5,17 +5,22 @@ import com.skylerdache.spacepong.exceptions.PlayerScoreException;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Random;
+
 @Getter
 @Setter
 public class Ball {
+    /** The percentage of each lateral dimension, centered in the midpoint,
+     * that a ball being reset may randomly be located in */
+    private static final double BOUNDS_RANGE_RANDOM_RESET = 0.8;
     private final double radius;
     private final SpaceBounds bounds;
     private double x = 0;
     private double y = 0;
     private double z = 0;
-    private double vx = 2;
-    private double vy = 1.3;
-    private double vz = -0.3;
+    private double vx = 0;
+    private double vy = 0;
+    private double vz = 0;
     public Ball(double radius, SpaceBounds spaceBounds) {
         this.radius = radius;
         this.bounds = spaceBounds;
@@ -23,6 +28,7 @@ public class Ball {
 
     public Ball(double radius) {
         this(radius,new SpaceBounds());
+        resetVelocity();
     }
     /**
      * simulates the motion of the ball
@@ -73,13 +79,34 @@ public class Ball {
             z += dt * vz;
         }
     }
+    public void resetPositionAndVelocity() {
+        resetPosition();
+        resetVelocity();
+    }
     public void resetPosition() {
-        this.x = 80*Math.random()-40;
-        this.y = 80*Math.random()-40;
-        this.z = 80*Math.random()-40;
+        this.x = bounds.centerX();
+        this.y = bounds.centerY();
+        this.z = bounds.centerZ();
+    }
+    public void randomizePosition() {
+        this.x = (2*Math.random()-1)*(bounds.xRange()*BOUNDS_RANGE_RANDOM_RESET);
+        this.y = (2*Math.random()-1)*(bounds.yRange()*BOUNDS_RANGE_RANDOM_RESET);
+        this.z = (2*Math.random()-1)*(bounds.zRange()*BOUNDS_RANGE_RANDOM_RESET);
+    }
+
+    /**
+     * The ball will have a random horizontal and vertical direction, but its direction toward
+     * either paddle/score zone will be either +1 or -1; so one player or the other will score
+     */
+    public void resetVelocity() {
         this.vx = 2*Math.random()-1;
         this.vy = 2*Math.random()-1;
-        this.vz = Math.random() > 0.5 ? 1 : -1;
+        //noinspection MagicNumber
+        if (Math.random() > 0.5) {
+            this.vz = 1;
+        } else {
+            this.vz = -1;
+        }
     }
 
     public String getPosition() {

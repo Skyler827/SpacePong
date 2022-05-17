@@ -47,16 +47,16 @@ public class GameState {
         try {
             ball.tick(dt, p1Paddle, p2Paddle);
         } catch (PlayerScoreException e) {
-            switch(e.scorer) {
-                case P1: {
+            switch (e.scorer) {
+                case P1 -> {
                     p1Score += 1;
                     gameEntity.setP1Score(p1Score);
-                    ball.resetPosition();
+                    ball.resetPositionAndVelocity();
                 }
-                case P2: {
+                case P2 -> {
                     p2Score += 1;
                     gameEntity.setP2Score(p2Score);
-                    ball.resetPosition();
+                    ball.resetPositionAndVelocity();
                 }
             }
             if (p1Score >= scoreThreshHold) {

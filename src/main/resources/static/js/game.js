@@ -12,8 +12,7 @@
     let lastTick;
     let p1Paddle;
     let p2Paddle;
-    let leftWallGridHelper;
-    let rightWallGridHelper;
+    let floor;
     let leftRightArrowState = "NONE";
     let upDownArrowState = "NONE";
     let playerPosition = "P1";
@@ -38,14 +37,14 @@
     function setCameraP1() {
         camera.up.set(0, 1, 0);
         camera.position.y = 65;
-        camera.position.z = 100;
+        camera.position.z = 130;
         camera.lookAt(new THREE.Vector3(0, 0, 0));
     }
 
     function setCameraP2() {
         camera.up.set(0, 1, 0);
         camera.position.y = 65;
-        camera.position.z = -100;
+        camera.position.z = -130;
         camera.lookAt(new THREE.Vector3(0, 0, 0));
     }
 
@@ -62,13 +61,13 @@
         scene.add(leftWall);
         scene.add(rightWall);
 
-        leftWallGridHelper = new THREE.GridHelper(100, 10);
+        const leftWallGridHelper = new THREE.GridHelper(100, 10);
         leftWallGridHelper.translateX(-49.4);
         leftWallGridHelper.translateY(50);
         leftWallGridHelper.rotateZ(Math.PI / 2);
         scene.add(leftWallGridHelper);
 
-        rightWallGridHelper = new THREE.GridHelper(100, 10);
+        const rightWallGridHelper = new THREE.GridHelper(100, 10);
         rightWallGridHelper.translateX(49.4);
         rightWallGridHelper.translateY(50);
         rightWallGridHelper.rotateZ(Math.PI / 2);
@@ -78,7 +77,7 @@
     function setFloor() {
         const floorMaterial = new THREE.MeshLambertMaterial({color: 0x09702d});
         const floorGeometry = new THREE.PlaneGeometry(100, 100);
-        const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+        floor = new THREE.Mesh(floorGeometry, floorMaterial);
         floor.rotateX(Math.PI/2);
         floor.translateY(-50);
         scene.add(floor);
@@ -331,8 +330,10 @@
         p2Paddle.position.x = gameState.p2PaddleX + dt * gameState.p2PaddleVx;
         p2Paddle.position.y = gameState.p2PaddleY + dt * gameState.p2PaddleVy;
         p2Paddle.position.z = gameState.p2PaddleZ + dt * gameState.p2PaddleVz;
+
+        floor.position.y = Math.sin(10*dt)
     }
-    function animate(_) {
+    function animate() {
         moveObjects();
         renderer.render(scene, camera);
         if (paused) return;

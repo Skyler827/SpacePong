@@ -36,14 +36,14 @@
 
     function setCameraP1() {
         camera.up.set(0, 1, 0);
-        camera.position.y = 65;
+        camera.position.y = 50;
         camera.position.z = 130;
         camera.lookAt(new THREE.Vector3(0, 0, 0));
     }
 
     function setCameraP2() {
         camera.up.set(0, 1, 0);
-        camera.position.y = 65;
+        camera.position.y = 50;
         camera.position.z = -130;
         camera.lookAt(new THREE.Vector3(0, 0, 0));
     }

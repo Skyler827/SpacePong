@@ -31,7 +31,7 @@
      * When the WebSession begins, reveal the sidebar, show the connected elements,
      * and hide the elements indicating disconnection.
      */
-    async function sessionOpen () {
+    function sessionOpen () {
         console.log("we did it! we knocked em over! (session open)");
         document.querySelector(".sidebar").classList.remove("visibility-hidden");
         document.querySelectorAll(".connected").forEach(element =>
@@ -40,6 +40,8 @@
             element.classList.add("display-none"));
         document.querySelectorAll(".disconnected").forEach(element =>
             element.classList.add("display-none"));
+        document.querySelectorAll(".online-users-list").forEach(element =>
+            element.classList.remove("display-none"));
     }
     async function handleData(message) {
         // console.log("just received the following data:");
@@ -159,6 +161,8 @@
             element.classList.add("display-none"));
         document.querySelectorAll(".connection-pending").forEach(element =>
             element.classList.add("display-none"));
+        document.querySelectorAll(".online-users-list").forEach(element =>
+            element.classList.add("display-none"))
     }
     function browserClose() {
         if (webSocketSession) {

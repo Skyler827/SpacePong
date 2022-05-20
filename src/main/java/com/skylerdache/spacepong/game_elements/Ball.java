@@ -51,7 +51,7 @@ public class Ball {
         } else { //within range:
             x += dt * vx;
         }
-        System.out.println("ball ticking: x from "+prevX+" to "+x);
+        // System.out.println("ball ticking: x from "+prevX+" to "+x);
         // Y axis (positive Y is up, negative Y is down):
         if (y + dt*vy + radius > bounds.YMax()) { //above max, bounce down:
             y = 2 * bounds.YMax() - y - vy*dt;

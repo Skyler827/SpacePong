@@ -17,6 +17,9 @@ import org.springframework.web.socket.WebSocketSession;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class OnlineService {
@@ -34,7 +37,8 @@ public class OnlineService {
         proposals = new HashMap<>();
         waitingPlayerSessions = new HashMap<>();
         userListSender = new UserListSender();
-        userListSender.start();
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        executor.scheduleAtFixedRate(userListSender,0,1, TimeUnit.SECONDS);
     }
     public void addNewPlayer(HumanPlayer p, WebSocketSession session) {
         userListSender.getNewSessions().put(p.getUsername(),session);

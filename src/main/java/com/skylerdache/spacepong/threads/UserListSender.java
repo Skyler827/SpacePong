@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 
-public class UserListSender extends Thread {
+public class UserListSender implements Runnable {
     /**
      * <code>playerSessions</code> contains the map from a users' username to the websocket
      * session for that player.
@@ -80,23 +80,15 @@ public class UserListSender extends Thread {
         rejectedRequests = new ConcurrentHashMap<>();
     }
 
+    @Override
     public void run() {
-        //noinspection InfiniteLoopStatement
-        while (true) {
-            handleNewSessions();
-            handleDisconnectingSessions();
-            handleLoggingOutPlayers();
-            handleNewGameRequests();
-            informUsersRequestsRejected();
-            handleWaitingGamesStarting();
-            sendListToUsers();
-            try {
-                //noinspection BusyWait
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                System.out.println("Shutting down");
-            }
-        }
+        handleNewSessions();
+        handleDisconnectingSessions();
+        handleLoggingOutPlayers();
+        handleNewGameRequests();
+        informUsersRequestsRejected();
+        handleWaitingGamesStarting();
+        sendListToUsers();
     }
 
     private void handleNewSessions() {

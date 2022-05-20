@@ -34,9 +34,9 @@ public class Paddle {
         x = 0;
         y = 0;
         z = 0;
-        vx = 1;
-        vy = 1;
-        vz = 1;
+        vx = 0;
+        vy = 0;
+        vz = 0;
         pos = PlayerPosition.P1;
     }
     private double xMax() {return x+x_length/2;}
@@ -52,27 +52,28 @@ public class Paddle {
     public void tick(double dt, PlayerControlState playerControlState) {
         x += dt * vx;
         y += dt * vy;
-        z += dt * vz;
         switch (playerControlState.leftRightState()) {
-            case LEFT: {
-                vx += dt*5;
-                vx *= Math.exp(-dt);
+            case LEFT -> {
+                switch (pos) {
+                    case P1 -> {vx += dt*5;}
+                    case P2 -> {vx -= dt*5;}
+                }
             }
-            case RIGHT: {
-                vx *= Math.exp(-dt);
+            case RIGHT -> {
+                switch (pos) {
+                    case P1 -> {vx -= dt*5;}
+                    case P2 -> {vx += dt*5;}
+                }
             }
-            case BOTH:
-            case NONE: {
-                vx *= Math.exp(-dt);
-            }
+            case BOTH, NONE -> {}
         }
+        switch (playerControlState.upDownState()) {
+            case UP -> { vy += dt*5; }
+            case DOWN -> { vy -= dt*5; }
+            case BOTH, NONE -> {}
+        }
+        vx *= Math.exp(-dt);
         vy *= Math.exp(-dt);
-        vz *= Math.exp(-dt);
-    }
-    public void singleAccelerate(double ax, double ay, double az) {
-        vx += ax;
-        vy += ay;
-        vz += az;
     }
     public boolean ballInRange(Ball b) {
         if (b.getX() > this.xMax()

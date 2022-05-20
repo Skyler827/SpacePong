@@ -8,19 +8,15 @@ import com.skylerdache.spacepong.entities.HumanPlayer;
 import com.skylerdache.spacepong.enums.PlayerPosition;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
 
 @Service
 public class GameStateSender implements Runnable {
@@ -29,8 +25,6 @@ public class GameStateSender implements Runnable {
     private final Map<Long, WebSocketSession> singlePlayerWebSockets;
     private final ConcurrentMap<Long, GameStateDto> singlePlayerGameStates;
     private final ConcurrentMap<Long, GameStateDto> twoPlayerGameStates;
-    private static final int TICK_DELAY_MILLIS_INITIAL = 4000;
-    private int TICK_DELAY_MILLIS = TICK_DELAY_MILLIS_INITIAL;
     public GameStateSender() {
         twoPlayerGameStates = new ConcurrentHashMap<>();
         singlePlayerGameStates = new ConcurrentHashMap<>();
@@ -38,10 +32,10 @@ public class GameStateSender implements Runnable {
         p2WebSockets = new HashMap<>();
         singlePlayerWebSockets = new HashMap<>();
     }
-    public synchronized void addSinglePlayerGame(long id) {
+    public void addSinglePlayerGame(long id) {
         singlePlayerGameStates.put(id, null);
     }
-    public synchronized void addTwoPlayerGame(long id) {
+    public void addTwoPlayerGame(long id) {
         twoPlayerGameStates.put(id, new GameStateDto());
     }
 
@@ -51,7 +45,7 @@ public class GameStateSender implements Runnable {
      * @param s the websocket session of the connecting user
      * @return true if all players are connected, false otherwise
      */
-    public synchronized boolean playerConnect(long gameId, WebSocketSession s) {
+    public boolean playerConnect(long gameId, WebSocketSession s) {
         if (twoPlayerGameStates.containsKey(gameId)) {
             if (p1WebSockets.containsKey(gameId)) {
                 p2WebSockets.put(gameId, s);
@@ -80,8 +74,9 @@ public class GameStateSender implements Runnable {
         sendAllGameStates();
     }
     private void sendAllGameStates() {
-        System.out.println("now running gameStateSender.sendAllGameStates()... (sp size: "+
-                singlePlayerGameStates.size()+", mp size:"+twoPlayerGameStates.size()+")");
+        String message = "now running gameStateSender.sendAllGameStates()... (sp size: "+
+                singlePlayerGameStates.size()+", mp size:"+twoPlayerGameStates.size()+")";
+        // System.out.println(message);
         synchronized(singlePlayerGameStates) {
             singlePlayerGameStates.forEach((id, gs) ->
                     sendMessages(id, createGameStateMessage(gs), singlePlayerWebSockets, PlayerPosition.P1)
@@ -105,7 +100,7 @@ public class GameStateSender implements Runnable {
         }
     }
     private void sendMessages(long id, TextMessage msg, @NotNull Map<Long, WebSocketSession> sockets, PlayerPosition p) {
-        System.out.println("sending to "+p.toString()+": "+msg.getPayload());
+        // System.out.println("sending to "+p.toString()+": "+msg.getPayload());
         try {
             sockets.get(id).sendMessage(msg);
         } catch (IOException e) {
@@ -116,7 +111,7 @@ public class GameStateSender implements Runnable {
         }
     }
 
-    public void updateGameDto(GameEntity gameEntity, GameStateDto dto) {
+    public void updateGameDto(@NotNull GameEntity gameEntity, GameStateDto dto) {
         if (gameEntity.getPlayer2() instanceof HumanPlayer) {
             twoPlayerGameStates.put(gameEntity.getId(), dto);
         } else {

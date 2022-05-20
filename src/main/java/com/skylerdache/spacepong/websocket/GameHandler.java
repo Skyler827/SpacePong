@@ -4,7 +4,6 @@ import com.skylerdache.spacepong.dto.PlayerControlMessage;
 import com.skylerdache.spacepong.entities.HumanPlayer;
 import com.skylerdache.spacepong.services.GameService;
 import com.skylerdache.spacepong.services.PlayerService;
-import nonapi.io.github.classgraph.json.JSONDeserializer;
 import nonapi.io.github.classgraph.json.JSONSerializer;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
@@ -44,8 +43,8 @@ public class GameHandler extends TextWebSocketHandler {
     }
     @Override
     public void handleTextMessage(@NotNull WebSocketSession session, @NotNull TextMessage message) {
-        System.out.println("new message:");
-        System.out.println(message.getPayload());
+        // System.out.println("new message:");
+        // System.out.println(message.getPayload());
         if (session.getPrincipal()==null) { throw new RuntimeException("this should never happen.");}
         if (!session.getPrincipal().getClass().equals(UsernamePasswordAuthenticationToken.class)) {
             throw new RuntimeException("this shouldn't happen");

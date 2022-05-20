@@ -3,7 +3,6 @@ package com.skylerdache.spacepong.dto;
 import com.skylerdache.spacepong.enums.LeftRightArrowState;
 import com.skylerdache.spacepong.enums.PlayerPosition;
 import com.skylerdache.spacepong.enums.UpDownArrowState;
-import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,7 +16,7 @@ public record PlayerControlMessage (
     long gameId,
     Instant time
 ) {
-    public PlayerControlMessage(JSONObject o) throws JSONException{
+    public PlayerControlMessage(@NotNull JSONObject o) throws JSONException{
         this(
             PlayerPosition.valueOf(o.getString("playerPosition")),
             LeftRightArrowState.valueOf(o.getString("lrState")),
@@ -35,7 +34,7 @@ public record PlayerControlMessage (
             Instant.now()
         );
     }
-    public JSONObject getJson() {
+    public @NotNull JSONObject getJson() {
         try {
             JSONObject o = new JSONObject();
             o.put("playerPosition", playerPosition);

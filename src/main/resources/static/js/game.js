@@ -38,14 +38,14 @@
         camera.up.set(0, 1, 0);
         camera.position.y = 50;
         camera.position.z = 130;
-        camera.lookAt(new THREE.Vector3(0, 0, 0));
+        camera.lookAt(new THREE.Vector3(0, 50, 0));
     }
 
     function setCameraP2() {
         camera.up.set(0, 1, 0);
         camera.position.y = 50;
         camera.position.z = -130;
-        camera.lookAt(new THREE.Vector3(0, 0, 0));
+        camera.lookAt(new THREE.Vector3(0, 50, 0));
     }
 
     function setWalls() {
@@ -79,7 +79,7 @@
         const floorGeometry = new THREE.PlaneGeometry(100, 100);
         floor = new THREE.Mesh(floorGeometry, floorMaterial);
         floor.rotateX(Math.PI/2);
-        floor.translateY(-50);
+        floor.translateY(-25);
         scene.add(floor);
     }
 

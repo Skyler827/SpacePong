@@ -248,7 +248,15 @@
             console.log(event);
         });
         socket.addEventListener("message", webSocketMessage);
-        socket.addEventListener("close", console.log);
+        socket.addEventListener("close", handleClose);
+    }
+    function handleClose(event) {
+        console.log(event);
+        if (!paused) {
+            cancelAnimationFrame(gameAnimationFrameId);
+            gameAnimationFrameId = null;
+            paused = true;
+        }
     }
     function sendControlStateMessage() {
         const controlStateJson ={

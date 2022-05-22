@@ -6,8 +6,11 @@ import com.skylerdache.spacepong.dto.GameStateDto;
 import com.skylerdache.spacepong.entities.GameEntity;
 import com.skylerdache.spacepong.entities.HumanPlayer;
 import com.skylerdache.spacepong.enums.PlayerPosition;
+import com.skylerdache.spacepong.exceptions.GameOverException;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -15,7 +18,6 @@ import org.springframework.web.socket.WebSocketSession;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -120,4 +122,25 @@ public class GameStateSender implements Runnable {
         }
     }
 
+    public void notifyGameOver(long id, @NotNull GameOverException e) {
+        JSONObject o = new JSONObject();
+        try {
+            o.put("type", "gameOver");
+            o.put("p1Score", e.p1Score);
+            o.put("p2Score", e.p2Score);
+            o.put("winner", e.winner);
+            o.put("reason", e.reason);
+        } catch (JSONException jsonE) {
+            throw new RuntimeException(jsonE);
+        }
+        TextMessage msg = new TextMessage(o.toString());
+        try {
+            p1WebSockets.get(id).sendMessage(msg);
+            if (p2WebSockets.containsKey(id)) {
+                p2WebSockets.get(id).sendMessage(msg);
+            }
+        } catch (IOException ioEx) {
+            throw new RuntimeException(ioEx);
+        }
+    }
 }

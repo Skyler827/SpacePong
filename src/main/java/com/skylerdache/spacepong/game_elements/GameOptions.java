@@ -4,6 +4,8 @@ import com.skylerdache.spacepong.dto.GameOptionsDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 @Data
 @NoArgsConstructor
@@ -25,5 +27,17 @@ public class GameOptions {
 
     public SpaceBounds getBounds() {
         return new SpaceBounds();
+    }
+
+    public JSONObject getJsonObject() {
+        JSONObject o = new JSONObject();
+        try {
+            o.put("scoreThreshold",scoreThreshold);
+            o.put("timeLimitMinutes",timeLimitMinutes);
+            o.put("isTimeLimited",isTimeLimited);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+        return o;
     }
 }

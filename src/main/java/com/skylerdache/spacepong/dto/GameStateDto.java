@@ -9,6 +9,7 @@ import java.time.Instant;
 
 @JsonSerialize
 public record GameStateDto (
+    String type,
     boolean paused,
     int p1Score,
     int p2Score,
@@ -34,6 +35,7 @@ public record GameStateDto (
 ) implements Serializable {
     public GameStateDto() {
         this(
+            "gameState",
             true,
             0,
             0,

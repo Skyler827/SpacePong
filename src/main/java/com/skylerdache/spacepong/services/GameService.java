@@ -7,7 +7,9 @@ import com.skylerdache.spacepong.entities.HumanPlayer;
 import com.skylerdache.spacepong.entities.Player;
 import com.skylerdache.spacepong.enums.GameOverReason;
 import com.skylerdache.spacepong.enums.PlayerPosition;
+import com.skylerdache.spacepong.exceptions.GameOverException;
 import com.skylerdache.spacepong.game_elements.GameOptions;
+import com.skylerdache.spacepong.game_elements.SpaceBounds;
 import com.skylerdache.spacepong.repositories.GameRepository;
 import com.skylerdache.spacepong.threads.GameRunner;
 import com.skylerdache.spacepong.threads.GameStateSender;
@@ -83,7 +85,7 @@ public class GameService {
         return gameRepository.findById(gameId).orElseThrow();
     }
 
-    public void notifyGameOver(GameEntity g) {
+    public void notifyGameOver(GameEntity g, GameOverException e) {
         gameRepository.save(g);
         gameIdByUserId.remove(g.getPlayer1().getId());
         gameIdByUserId.remove(g.getPlayer2().getId());
@@ -106,5 +108,9 @@ public class GameService {
 
     public void cancelGameByPlayer(HumanPlayer p, GameOverReason p1disconnect) {
         //TODO: implement this
+    }
+
+    public SpaceBounds getBounds(GameEntity ge) {
+        return gameRunner.getBounds(ge.getId());
     }
 }

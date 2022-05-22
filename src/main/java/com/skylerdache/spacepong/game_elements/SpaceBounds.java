@@ -1,5 +1,9 @@
 package com.skylerdache.spacepong.game_elements;
 
+import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public record SpaceBounds(
         double XMin,
         double XMax,
@@ -32,4 +36,19 @@ public record SpaceBounds(
     public double centerX() { return XMax/2 + XMin/2;}
     public double centerY() { return YMax/2 + YMin/2;}
     public double centerZ() { return ZMax/2 + ZMin/2;}
+
+    public @NotNull JSONObject getJsonObject() {
+        JSONObject o = new JSONObject();
+        try {
+            o.put("xMin", XMin);
+            o.put("xMax", XMax);
+            o.put("yMin", YMin);
+            o.put("yMax", YMax);
+            o.put("zMin", ZMin);
+            o.put("zMax", ZMax);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+        return o;
+    }
 }

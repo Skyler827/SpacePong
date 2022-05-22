@@ -71,6 +71,7 @@ public class GameState {
     }
     public GameStateDto getDto() {
         return new GameStateDto(
+            "gameState",
             paused,
             p1Score,
             p2Score,
@@ -105,4 +106,8 @@ public class GameState {
     public boolean isPaused() { return paused; }
     public void unpause() { paused = false; }
     public void pause() { paused = true; }
+
+    public SpaceBounds getBounds() {
+        return bounds;
+    }
 }

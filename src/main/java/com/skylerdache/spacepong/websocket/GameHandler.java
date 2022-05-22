@@ -1,9 +1,12 @@
 package com.skylerdache.spacepong.websocket;
 
 import com.skylerdache.spacepong.dto.PlayerControlMessage;
+import com.skylerdache.spacepong.entities.GameEntity;
 import com.skylerdache.spacepong.entities.HumanPlayer;
 import com.skylerdache.spacepong.enums.GameOverReason;
 import com.skylerdache.spacepong.enums.PlayerPosition;
+import com.skylerdache.spacepong.game_elements.GameOptions;
+import com.skylerdache.spacepong.game_elements.SpaceBounds;
 import com.skylerdache.spacepong.services.GameService;
 import com.skylerdache.spacepong.services.PlayerService;
 import org.jetbrains.annotations.NotNull;
@@ -41,14 +44,20 @@ public class GameHandler extends TextWebSocketHandler {
         p = (HumanPlayer)principal.getPrincipal();
         System.out.println("user connected: " + p.getUsername());
         PlayerPosition userPosition;
+        GameEntity ge = gameService.getOngoingGameByPlayer(p);
+        SpaceBounds bounds = gameService.getBounds(ge);
+        GameOptions options = ge.getOptions();
         try {
             userPosition = gameService.userConnected(p, session);
         } catch (NoSuchElementException e) {
             throw new RuntimeException("this shouldn't happen");
         }
-        JSONObject o = new JSONObject();
+        JSONObject o = options.getJsonObject();
         try {
+            o.put("type", "initialization");
             o.put("playerPosition", userPosition.toString());
+            o.put("gameId",ge.getId());
+            o.put("bounds", bounds.getJsonObject());
         } catch (JSONException e) {
             throw new RuntimeException("This will never happen");
         }

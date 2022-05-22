@@ -5,6 +5,7 @@ import com.skylerdache.spacepong.entities.GameEntity;
 import com.skylerdache.spacepong.exceptions.GameOverException;
 import com.skylerdache.spacepong.game_elements.GameOptions;
 import com.skylerdache.spacepong.game_elements.GameState;
+import com.skylerdache.spacepong.game_elements.SpaceBounds;
 import com.skylerdache.spacepong.services.GameService;
 import org.jetbrains.annotations.NotNull;
 
@@ -97,7 +98,8 @@ public class GameRunner implements Runnable {
                 case P1: {ge.setWinner(ge.getPlayer1());}
                 case P2: {ge.setWinner(ge.getPlayer2());}
             }
-            gameService.notifyGameOver(ge);
+            gameService.notifyGameOver(ge, e);
+            gameStateSender.notifyGameOver(ge.getId(), e);
         }
     }
     public void pauseGame(long id) {
@@ -118,5 +120,9 @@ public class GameRunner implements Runnable {
             }
         }
         throw new NoSuchElementException("");
+    }
+
+    public SpaceBounds getBounds(long id) {
+        return games.get(id).getBounds();
     }
 }

@@ -17,10 +17,15 @@
     let upDownArrowState = "NONE";
     let playerPosition = "P1";
     let gameId = 0;
+    let scoreThreshold;
+    let timeLimitMinutes;
+    let isTimeLimited;
+    let bounds = {};
     let socket;
     let paused = true;
     let gameAnimationFrameId;
     let pressedKeys;
+    let gameOverFunctionCalled = false;
     const userAgent = navigator.userAgent;
     const firefoxX11 = userAgent.includes("Firefox") && userAgent.includes("Linux");
     console.log("firefoxX11: "+firefoxX11);
@@ -273,10 +278,16 @@
     }
     function webSocketMessage(event) {
         let messageData = JSON.parse(event.data);
-        if (messageData.tickInstant) {
-            handleGameStateMessage(messageData);
-        } else {
-            handleInitializationMessage(messageData);
+        switch(messageData["type"]) {
+            case "initialization":
+                handleInitializationMessage(messageData);
+                break;
+            case "gameState":
+                handleGameStateMessage(messageData);
+                break;
+            case "gameOver":
+                handleGameOver(messageData);
+                break;
         }
     }
     function handleGameStateMessage(messageData) {
@@ -296,6 +307,11 @@
         console.log("initialization event:");
         console.log(data);
         playerPosition = data["playerPosition"];
+        gameId = data["gameId"];
+        scoreThreshold = data["scoreThreshold"];
+        timeLimitMinutes = data["timeLimitMinutes"];
+        isTimeLimited = data["isTimeLimited"];
+        bounds = data["bounds"];
         switch(playerPosition) {
             case "P1":
                 setCameraP1();
@@ -304,6 +320,27 @@
                 setCameraP2();
                 break;
         }
+    }
+    function handleGameOver(data) {
+        if (gameOverFunctionCalled) return;
+        gameOverFunctionCalled = true;
+        let msg;
+        switch (data["reason"]) {
+            case "SCORE":
+            case "TIME":
+                if (playerPosition === data["winner"]) {
+                    msg = "You won the game! Congratulations!";
+                } else {
+                    msg = "You lost the game!";
+                }
+                break;
+            case "P1DISCONNECT":
+            case "P2DISCONNECT":
+                msg = "game ended due to disconnect by "+data["reason"].substr(0,2);
+                break;
+        }
+        alert(msg);
+        window.location = "/";
     }
 
     async function start() {

@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Contract;
 public class Paddle {
     public static final int CONTROL_ACCELERATION = 15;
     public static final double DECAY_ACCELERATION_RT = 0.5;
+    public static final double EPSILON = 0.1;
     private final double x_length;
     private final double y_length;
     private final double z_length;
@@ -57,32 +58,44 @@ public class Paddle {
     public void tick(double dt, PlayerControlState playerControlState) {
         x += dt * vx;
         y += dt * vy;
-        if (x > bounds.XMax()) x = bounds.XMax();
-        if (x < bounds.XMin()) x = bounds.XMin();
-        if (y > bounds.YMax()) y = bounds.YMax();
-        if (y < bounds.YMin()) y = bounds.YMin();
-        switch (playerControlState.leftRightState()) {
-            case LEFT -> {
-                switch (pos) {
-                    case P1 -> {vx -= dt*CONTROL_ACCELERATION;}
-                    case P2 -> {vx += dt*CONTROL_ACCELERATION;}
+        if (x > bounds.XMax() + EPSILON) {
+            x = bounds.XMax();
+            vx = 0;
+        } else if (x < bounds.XMin() - EPSILON) {
+            x = bounds.XMin();
+            vx = 0;
+        } else {
+            switch (playerControlState.leftRightState()) {
+                case LEFT -> {
+                    switch (pos) {
+                        case P1 -> {vx -= dt*CONTROL_ACCELERATION;}
+                        case P2 -> {vx += dt*CONTROL_ACCELERATION;}
+                    }
                 }
-            }
-            case RIGHT -> {
-                switch (pos) {
-                    case P1 -> {vx += dt*CONTROL_ACCELERATION;}
-                    case P2 -> {vx -= dt*CONTROL_ACCELERATION;}
+                case RIGHT -> {
+                    switch (pos) {
+                        case P1 -> {vx += dt*CONTROL_ACCELERATION;}
+                        case P2 -> {vx -= dt*CONTROL_ACCELERATION;}
+                    }
                 }
+                case BOTH, NONE -> {}
             }
-            case BOTH, NONE -> {}
+            vx *= Math.exp(-dt * DECAY_ACCELERATION_RT);
         }
-        switch (playerControlState.upDownState()) {
-            case UP -> { vy += dt*CONTROL_ACCELERATION; }
-            case DOWN -> { vy -= dt*CONTROL_ACCELERATION; }
-            case BOTH, NONE -> {}
+        if (y > bounds.YMax() + EPSILON) {
+            y = bounds.YMax();
+            vy = 0;
+        } else if (y < bounds.YMin() - EPSILON) {
+            y = bounds.YMin();
+            vy = 0;
+        } else {
+            switch (playerControlState.upDownState()) {
+                case UP -> { vy += dt*CONTROL_ACCELERATION; }
+                case DOWN -> { vy -= dt*CONTROL_ACCELERATION; }
+                case BOTH, NONE -> {}
+            }
+            vy *= Math.exp(-dt * DECAY_ACCELERATION_RT);
         }
-        vx *= Math.exp(-dt * DECAY_ACCELERATION_RT);
-        vy *= Math.exp(-dt * DECAY_ACCELERATION_RT);
     }
     public boolean ballInRange(Ball b) {
         if (b.getX() > this.xMax()

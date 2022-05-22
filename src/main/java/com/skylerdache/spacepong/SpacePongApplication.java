@@ -1,9 +1,5 @@
 package com.skylerdache.spacepong;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.skylerdache.spacepong.dto.GameStateDto;
-import com.skylerdache.spacepong.dto.PlayerControlMessage;
 import com.skylerdache.spacepong.dto.PlayerDto;
 import com.skylerdache.spacepong.services.PlayerService;
 import org.springframework.boot.SpringApplication;
@@ -14,8 +10,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import java.io.*;
-import java.time.Instant;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -36,46 +30,6 @@ public class SpacePongApplication {
 //        for (String beanName : beanNames) {
 //            System.out.println(beanName);
 //        }
-        ObjectMapper m = new ObjectMapper();
-        GameStateDto gsdto1 = new GameStateDto(
-            true,
-            0,
-            0,
-            Instant.now().toString(),
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0
-        );
-        try {
-            System.out.println(m.writeValueAsString(gsdto1));
-        } catch (JsonProcessingException e) {
-            System.out.println("Json processing Exception");
-        }
-        try {
-            String gsJsonString = "{\"paused\":false,\"p1Score\":0,\"p2Score\":0,\"p1PaddleX\":0.0,\"p1PaddleY\":0.0,\"p1PaddleZ\":0.0,\"p1PaddleVx\":0.0,\"p1PaddleVy\":0.0,\"p1PaddleVz\":0.0,\"p2PaddleX\":0.0,\"p2PaddleY\":0.0,\"p2PaddleZ\":0.0,\"p2PaddleVx\":0.0,\"p2PaddleVy\":0.0,\"p2PaddleVz\":0.0,\"ballX\":0.0,\"ballY\":0.0,\"ballZ\":0.0,\"ballVx\":0.0,\"ballVy\":0.0,\"ballVz\":0.0}";
-            InputStream gsFileStream = new ByteArrayInputStream(gsJsonString.getBytes());
-            GameStateDto gsdto2 = m.readValue(gsFileStream, GameStateDto.class);
-            System.out.println(gsdto2.ballVz());
-        } catch (IOException e) {
-            System.out.println("IO Exception");
-        }
-        PlayerControlMessage pcm = new PlayerControlMessage();
-        System.out.println(pcm.getJson());
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -96,8 +50,8 @@ public class SpacePongApplication {
         user3.setColorHex("#44CC33");
         playerService.registerNewPlayer(user3);
     }
-    @Bean()
-    public Executor taskScheduler() {
-        return Executors.newScheduledThreadPool(5);
-    }
+//    @Bean()
+//    public Executor taskScheduler() {
+//        return Executors.newScheduledThreadPool(5);
+//    }
 }

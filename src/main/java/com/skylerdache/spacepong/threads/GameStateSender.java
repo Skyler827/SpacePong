@@ -15,6 +15,7 @@ import org.springframework.web.socket.WebSocketSession;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -118,4 +119,5 @@ public class GameStateSender implements Runnable {
             singlePlayerGameStates.put(gameEntity.getId(),dto);
         }
     }
+
 }

@@ -73,9 +73,12 @@ public class GameService {
     }
 
     public GameEntity getOngoingGameByPlayer(@NotNull Player p) throws NoSuchElementException {
-        Long gameId = gameIdByUserId.get(p.getId());
-        if (gameId == null) {
-            throw new NoSuchElementException("no game reference for this user");
+        long playerId = p.getId();
+        Long gameId;
+        if (gameIdByUserId.containsKey(playerId)) {
+            gameId = gameIdByUserId.get(playerId);
+        } else {
+            gameId = gameRunner.getIdByUserId(playerId);
         }
         return gameRepository.findById(gameId).orElseThrow();
     }

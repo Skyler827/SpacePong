@@ -12,6 +12,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.concurrent.*;
 
@@ -104,5 +105,18 @@ public class GameRunner implements Runnable {
     }
     public void unpauseGame(long id) {
         games.get(id).unpause();
+    }
+
+    public long getIdByUserId(long id) throws NoSuchElementException{
+        for (var e: games.entrySet()) {
+            GameEntity game = e.getValue().getGameEntity();
+            if (game.getPlayer1().getId() == id) {
+                return game.getId();
+            }
+            if (game.getPlayer2().getId() == id) {
+                return game.getId();
+            }
+        }
+        throw new NoSuchElementException("");
     }
 }

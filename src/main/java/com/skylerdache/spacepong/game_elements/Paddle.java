@@ -8,7 +8,8 @@ import org.jetbrains.annotations.Contract;
 @Getter
 @Setter
 public class Paddle {
-    public static final int CONTROL_ACCELERATION = 25;
+    public static final int CONTROL_ACCELERATION = 15;
+    public static final double DECAY_ACCELERATION_RT = 0.5;
     private final double x_length;
     private final double y_length;
     private final double z_length;
@@ -19,10 +20,12 @@ public class Paddle {
     private double vy;
     private double vz;
     private PlayerPosition pos;
+    private SpaceBounds bounds;
     @Contract(pure = true)
     public Paddle(PlayerPosition p, SpaceBounds b) {
         this();
         pos = p;
+        bounds = b;
         z = switch (p) {
             case P1 -> b.ZMax();
             case P2 -> b.ZMin();
@@ -39,6 +42,7 @@ public class Paddle {
         vy = 0;
         vz = 0;
         pos = PlayerPosition.P1;
+        bounds = new SpaceBounds();
     }
     private double xMax() {return x+x_length/2;}
     private double xMin() {return x-x_length/2;}
@@ -53,6 +57,10 @@ public class Paddle {
     public void tick(double dt, PlayerControlState playerControlState) {
         x += dt * vx;
         y += dt * vy;
+        if (x > bounds.XMax()) x = bounds.XMax();
+        if (x < bounds.XMin()) x = bounds.XMin();
+        if (y > bounds.YMax()) y = bounds.YMax();
+        if (y < bounds.YMin()) y = bounds.YMin();
         switch (playerControlState.leftRightState()) {
             case LEFT -> {
                 switch (pos) {
@@ -73,8 +81,8 @@ public class Paddle {
             case DOWN -> { vy -= dt*CONTROL_ACCELERATION; }
             case BOTH, NONE -> {}
         }
-        vx *= Math.exp(-dt);
-        vy *= Math.exp(-dt);
+        vx *= Math.exp(-dt * DECAY_ACCELERATION_RT);
+        vy *= Math.exp(-dt * DECAY_ACCELERATION_RT);
     }
     public boolean ballInRange(Ball b) {
         if (b.getX() > this.xMax()

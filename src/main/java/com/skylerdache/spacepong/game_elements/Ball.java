@@ -10,9 +10,6 @@ import java.util.Random;
 @Getter
 @Setter
 public class Ball {
-    /** The percentage of each lateral dimension, centered in the midpoint,
-     * that a ball being reset may randomly be located in */
-    private static final double BOUNDS_RANGE_RANDOM_RESET = 0.8;
     private final double radius;
     private final SpaceBounds bounds;
     private double x = 0;
@@ -24,11 +21,7 @@ public class Ball {
     public Ball(double radius, SpaceBounds spaceBounds) {
         this.radius = radius;
         this.bounds = spaceBounds;
-    }
-
-    public Ball(double radius) {
-        this(radius,new SpaceBounds());
-        resetVelocity();
+        this.resetPositionAndVelocity();
     }
     /**
      * simulates the motion of the ball
@@ -44,10 +37,12 @@ public class Ball {
         if (x + dt*vx + radius > bounds.XMax()) { //above max, bounce down:
             x = 2*bounds.XMax() - x - vx*dt;
             vx = -vx;
+            System.out.println("ball bounce off wall");
         }
         else if (x + dt*vx - radius < bounds.XMin()) { //below min, bounce up:
             x = 2*bounds.XMin() - x - vx*dt;
             vx = -vx;
+            System.out.println("ball bounce off other wall");
         } else { //within range:
             x += dt * vx;
         }
@@ -56,9 +51,11 @@ public class Ball {
         if (y + dt*vy + radius > bounds.YMax()) { //above max, bounce down:
             y = 2 * bounds.YMax() - y - vy*dt;
             vy = -vy;
+            System.out.println("ball bounce down");
         } else if (y + dt*vy - radius < bounds.YMin()) { //below min, bounce up:
             y = 2 * bounds.YMin() - y - vy*dt;
             vy = -vy;
+            System.out.println("ball bounce up");
         } else { //within range:
             y += dt * vy;
         }
@@ -87,11 +84,6 @@ public class Ball {
         this.x = bounds.centerX();
         this.y = bounds.centerY();
         this.z = bounds.centerZ();
-    }
-    public void randomizePosition() {
-        this.x = (2*Math.random()-1)*(bounds.xRange()*BOUNDS_RANGE_RANDOM_RESET);
-        this.y = (2*Math.random()-1)*(bounds.yRange()*BOUNDS_RANGE_RANDOM_RESET);
-        this.z = (2*Math.random()-1)*(bounds.zRange()*BOUNDS_RANGE_RANDOM_RESET);
     }
 
     /**

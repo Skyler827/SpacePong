@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Contract;
 @Getter
 @Setter
 public class Paddle {
+    public static final int CONTROL_ACCELERATION = 25;
     private final double x_length;
     private final double y_length;
     private final double z_length;
@@ -19,12 +20,12 @@ public class Paddle {
     private double vz;
     private PlayerPosition pos;
     @Contract(pure = true)
-    public Paddle(PlayerPosition p) {
+    public Paddle(PlayerPosition p, SpaceBounds b) {
         this();
         pos = p;
         z = switch (p) {
-            case P1 -> -50;
-            case P2 -> 50;
+            case P1 -> b.ZMax();
+            case P2 -> b.ZMin();
         };
     }
     public Paddle() {
@@ -55,21 +56,21 @@ public class Paddle {
         switch (playerControlState.leftRightState()) {
             case LEFT -> {
                 switch (pos) {
-                    case P1 -> {vx += dt*5;}
-                    case P2 -> {vx -= dt*5;}
+                    case P1 -> {vx -= dt*CONTROL_ACCELERATION;}
+                    case P2 -> {vx += dt*CONTROL_ACCELERATION;}
                 }
             }
             case RIGHT -> {
                 switch (pos) {
-                    case P1 -> {vx -= dt*5;}
-                    case P2 -> {vx += dt*5;}
+                    case P1 -> {vx += dt*CONTROL_ACCELERATION;}
+                    case P2 -> {vx -= dt*CONTROL_ACCELERATION;}
                 }
             }
             case BOTH, NONE -> {}
         }
         switch (playerControlState.upDownState()) {
-            case UP -> { vy += dt*5; }
-            case DOWN -> { vy -= dt*5; }
+            case UP -> { vy += dt*CONTROL_ACCELERATION; }
+            case DOWN -> { vy -= dt*CONTROL_ACCELERATION; }
             case BOTH, NONE -> {}
         }
         vx *= Math.exp(-dt);

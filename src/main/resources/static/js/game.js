@@ -274,7 +274,6 @@
     function handleGameStateMessage(messageData) {
         gameState = messageData;
         lastTick = new Date(gameState["tickInstant"]);
-        console.log("lastTick = "+lastTick);
         paused = gameState["paused"];
         document.querySelector("#p1-score").textContent = gameState.p1Score;
         document.querySelector("#p2-score").textContent = gameState.p2Score;
@@ -288,6 +287,15 @@
     function handleInitializationMessage(data) {
         console.log("initialization event:");
         console.log(data);
+        playerPosition = data["playerPosition"];
+        switch(playerPosition) {
+            case "P1":
+                setCameraP1();
+                break;
+            case "P2":
+                setCameraP2();
+                break;
+        }
     }
 
     async function start() {

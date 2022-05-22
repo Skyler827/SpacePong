@@ -22,4 +22,8 @@ public class GameOptions {
         this.isTimeLimited = options.getIsTimeLimited().equals("true");
         this.timeLimitMinutes = options.getTimeLimitMinutes();
     }
+
+    public SpaceBounds getBounds() {
+        return new SpaceBounds();
+    }
 }

@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import java.time.Instant;
 
 public class GameState {
+    private final SpaceBounds bounds;
     private final Ball ball;
     private final Paddle p1Paddle;
     private final Paddle p2Paddle;
@@ -28,9 +29,10 @@ public class GameState {
     private boolean paused = true;
     public GameState(@NotNull GameOptions options, GameEntity gameEntity) {
         scoreThreshHold = options.getScoreThreshold();
-        ball = new Ball(4);
-        p1Paddle = new Paddle(PlayerPosition.P1);
-        p2Paddle = new Paddle(PlayerPosition.P2);
+        bounds = options.getBounds();
+        ball = new Ball(4, bounds);
+        p1Paddle = new Paddle(PlayerPosition.P1, bounds);
+        p2Paddle = new Paddle(PlayerPosition.P2, bounds);
         p1Control = new PlayerControlState(LeftRightArrowState.NONE, UpDownArrowState.NONE);
         p2Control = new PlayerControlState(LeftRightArrowState.NONE, UpDownArrowState.NONE);
         this.gameEntity = gameEntity;
@@ -95,7 +97,6 @@ public class GameState {
     }
 
     public void update(@NotNull PlayerControlMessage m) {
-        System.out.println("got to GameState.update()");
         switch (m.playerPosition()) {
             case P1 -> p1Control = new PlayerControlState(m.lrState(), m.udState());
             case P2 -> p2Control = new PlayerControlState(m.lrState(), m.udState());

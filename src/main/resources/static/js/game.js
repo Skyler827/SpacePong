@@ -110,6 +110,33 @@
         p2Paddle.translateX(-30);
         scene.add(p2Paddle);
     }
+    function updatePaddleSize(xLength, yLength, zLength) {
+        const newPaddleGeometry = new THREE.BoxGeometry(xLength,yLength,zLength);
+        const newPaddleMaterial = new THREE.MeshLambertMaterial({color: 0x42f5f5});
+        const p1PaddlePositions = {
+            x: p1Paddle.positionX,
+            y: p1Paddle.positionY,
+            z: p1Paddle.positionZ
+        };
+        const p2PaddlePositions = {
+            x: p2Paddle.positionX,
+            y: p2Paddle.positionY,
+            z: p2Paddle.positionZ
+        };
+        scene.remove(p1Paddle);
+        scene.remove(p2Paddle);
+        p1Paddle = new THREE.Mesh(newPaddleGeometry, newPaddleMaterial);
+        p2Paddle = new THREE.Mesh(newPaddleGeometry, newPaddleMaterial);
+        p1Paddle.positionX = p1PaddlePositions.x;
+        p1Paddle.positionY = p1PaddlePositions.y;
+        p1Paddle.positionZ = p1PaddlePositions.z;
+        p2Paddle.positionX = p2PaddlePositions.x;
+        p2Paddle.positionY = p2PaddlePositions.y;
+        p2Paddle.positionZ = p2PaddlePositions.z;
+        scene.add(p1Paddle);
+        scene.add(p2Paddle);
+
+    }
 
     function setScene() {
         setWalls();
@@ -312,6 +339,7 @@
         timeLimitMinutes = data["timeLimitMinutes"];
         isTimeLimited = data["isTimeLimited"];
         bounds = data["bounds"];
+        updatePaddleSize(data["paddleXLength"], data["paddleYLength"], data["paddleZLength"]);
         switch(playerPosition) {
             case "P1":
                 setCameraP1();

@@ -58,6 +58,7 @@ public class GameHandler extends TextWebSocketHandler {
             o.put("playerPosition", userPosition.toString());
             o.put("gameId",ge.getId());
             o.put("bounds", bounds.getJsonObject());
+            o.put("paddleSize", 0);
         } catch (JSONException e) {
             throw new RuntimeException("This will never happen");
         }

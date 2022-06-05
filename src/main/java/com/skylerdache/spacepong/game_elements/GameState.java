@@ -28,13 +28,15 @@ public class GameState {
     private final GameEntity gameEntity;
     private boolean paused = true;
     public GameState(@NotNull GameOptions options, GameEntity gameEntity) {
-        scoreThreshHold = options.getScoreThreshold();
-        bounds = options.getBounds();
-        ball = new Ball(4, bounds);
-        p1Paddle = new Paddle(PlayerPosition.P1, bounds);
-        p2Paddle = new Paddle(PlayerPosition.P2, bounds);
-        p1Control = new PlayerControlState(LeftRightArrowState.NONE, UpDownArrowState.NONE);
-        p2Control = new PlayerControlState(LeftRightArrowState.NONE, UpDownArrowState.NONE);
+        this.scoreThreshHold = options.getScoreThreshold();
+        this.bounds = options.getBounds();
+        this.ball = new Ball(4, bounds);
+        this.p1Paddle = new Paddle(PlayerPosition.P1, bounds, options.getPaddleXLength(),
+                options.getPaddleYLength(), options.getPaddleZLength());
+        this.p2Paddle = new Paddle(PlayerPosition.P2, bounds, options.getPaddleXLength(),
+                options.getPaddleYLength(), options.getPaddleZLength());
+        this.p1Control = new PlayerControlState(LeftRightArrowState.NONE, UpDownArrowState.NONE);
+        this.p2Control = new PlayerControlState(LeftRightArrowState.NONE, UpDownArrowState.NONE);
         this.gameEntity = gameEntity;
     }
 

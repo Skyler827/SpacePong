@@ -5,8 +5,6 @@ import com.skylerdache.spacepong.exceptions.PlayerScoreException;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Random;
-
 @Getter
 @Setter
 public class Ball {
@@ -31,18 +29,15 @@ public class Ball {
      * @throws PlayerScoreException if the ball goes out of bounds in a way that a player scores a point
      */
     public void tick(double dt, Paddle p1Paddle, Paddle p2Paddle) throws PlayerScoreException {
-        double prevX = x;
         // bounce logic:
         // X axis (positive X is p1's right, p2's left) :
         if (x + dt*vx + radius > bounds.XMax()) { //above max, bounce down:
             x = 2*bounds.XMax() - x - vx*dt;
             vx = -vx;
-            System.out.println("ball bounce off wall");
         }
         else if (x + dt*vx - radius < bounds.XMin()) { //below min, bounce up:
             x = 2*bounds.XMin() - x - vx*dt;
             vx = -vx;
-            System.out.println("ball bounce off other wall");
         } else { //within range:
             x += dt * vx;
         }
@@ -51,29 +46,28 @@ public class Ball {
         if (y + dt*vy + radius > bounds.YMax()) { //above max, bounce down:
             y = 2 * bounds.YMax() - y - vy*dt;
             vy = -vy;
-            System.out.println("ball bounce down");
         } else if (y + dt*vy - radius < bounds.YMin()) { //below min, bounce up:
             y = 2 * bounds.YMin() - y - vy*dt;
             vy = -vy;
-            System.out.println("ball bounce up");
         } else { //within range:
             y += dt * vy;
         }
         // Z axis (positive Z is towards P1, negative Z is towards P2):
-        if (z + dt*vz + radius > bounds.ZMax()) { //above max, check for collision with p1's paddle:
-            if (p1Paddle.ballInRange(this)) {
-                z = 2*bounds.ZMax() - z - vz*dt;
-            } else {
-                throw new PlayerScoreException(PlayerPosition.P2);
-            }
-        } else if (z + dt*vz - radius < bounds.ZMin()) { //below min, check for collision with p2's paddle:
-            if (p2Paddle.ballInRange(this)) {
-                z = 2*bounds.ZMin() - z - vz*dt;
-            } else {
-                throw new PlayerScoreException(PlayerPosition.P1);
-            }
+        if (z + dt*vz + radius > bounds.ZMax()) { //above max
+            throw new PlayerScoreException(PlayerPosition.P2);
+        } else
+        if (z + dt*vz - radius < bounds.ZMin()) { //below min
+            throw new PlayerScoreException(PlayerPosition.P1);
         } else { //within range:
-            z += dt * vz;
+            if (p1Paddle.ballInRange(this)) {
+                z = 2*p1Paddle.zMin() - z - vz*dt;
+                vz *= -1;
+            } else if (p2Paddle.ballInRange(this)) {
+                z = 2*p2Paddle.zMax() - z - vz*dt;
+                vz *= -1;
+            } else {
+                z += dt * vz;
+            }
         }
     }
     public void resetPositionAndVelocity() {
